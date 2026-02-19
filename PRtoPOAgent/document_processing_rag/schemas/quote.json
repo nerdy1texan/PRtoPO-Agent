@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Quote",
+  "description": "Parsed supplier quotation (PDF/Word/Excel). Used by Check 2 (validity, expiration, supplier/entity), Check 3 (supplier), Check 4 (description), Check 5 (qty/UOM), Check 6 (price/amount), Check 7 (currency), Check 8 (payment terms vs contract).",
+  "type": "object",
+  "required": ["quote_number", "quote_date", "currency", "line_items"],
+  "properties": {
+    "source_file_name": { "type": "string", "description": "Attachment file name (e.g. CDW_Quote_Q25-0847_Meridian_ThinkPad_P16.pdf)." },
+    "quote_number": { "type": "string", "description": "Quote ID (e.g. Q25-0847-MTECH)." },
+    "quote_date": { "type": "string", "format": "date", "description": "Date of quote. Check 2 (before PR date)." },
+    "valid_through": { "type": "string", "format": "date", "description": "Quote expiration. Check 2 (after PR date)." },
+    "payment_terms": { "type": "string", "description": "Payment terms on quote (e.g. Net 30). Check 8 (vs PR and contract)." },
+    "contract_ref": { "type": "string", "description": "Referenced MSA/contract (e.g. MSA-CDW-2024-0156). Check 8, 10." },
+    "account_number": { "type": "string", "description": "Customer account at supplier." },
+    "account_executive_name": { "type": "string" },
+    "account_executive_phone": { "type": "string" },
+    "account_executive_email": { "type": "string" },
+    "currency": { "type": "string", "description": "Currency (e.g. USD). Check 7." },
+    "bill_to": {
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "attention": { "type": "string" },
+        "address": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "ship_to": {
+      "type": "object",
+      "properties": {
+        "company": { "type": "string" },
+        "attention": { "type": "string" },
+        "address": { "type": "string" },
+        "email": { "type": "string" }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["line_number", "quantity", "unit_of_measure", "unit_price", "extended_price"],
+        "properties": {
+          "line_number": { "type": "integer" },
+          "supplier_part_number": { "type": "string", "description": "Supplier P/N (e.g. CDW 7458923)." },
+          "manufacturer_part_number": { "type": "string", "description": "Mfr P/N (e.g. 21FA000GUS)." },
+          "description": { "type": "string", "description": "Item description. Check 4 (semantic match to PR line)." },
+          "quantity": { "type": "number", "description": "Check 5." },
+          "unit_of_measure": { "type": "string", "description": "Check 5 (normalize e.g. Hrs -> Hours)." },
+          "unit_price": { "type": "number", "description": "Check 6 (vs PR unit price)." },
+          "extended_price": { "type": "number", "description": "Check 6 (vs PR line total)." }
+        }
+      }
+    },
+    "subtotal": { "type": "number", "description": "Subtotal before tax/shipping." },
+    "shipping_amount": { "type": "number", "description": "Shipping (0 if included)." },
+    "estimated_tax": { "type": "number", "description": "Tax estimate if shown." },
+    "total": { "type": "number", "description": "Total. Check 6 (vs PR total)." },
+    "pricing_notes": { "type": "array", "items": { "type": "string" }, "description": "Numbered pricing/availability notes." },
+    "prepared_by": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "company": { "type": "string" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" }
+      }
+    },
+    "supplier_name": { "type": "string", "description": "Vendor/supplier name. Check 2, 3 (match PR, master)." },
+    "extraction_confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "Overall extraction confidence." }
+  },
+  "example": {
+    "source_file_name": "CDW_Quote_Q25-0847_Meridian_ThinkPad_P16.pdf",
+    "quote_number": "Q25-0847-MTECH",
+    "quote_date": "2026-01-13",
+    "valid_through": "2026-03-15",
+    "payment_terms": "Net 30",
+    "contract_ref": "MSA-CDW-2024-0156",
+    "account_number": "MTECH-28174",
+    "account_executive_name": "Jennifer Walsh",
+    "account_executive_email": "jennifer.walsh@cdw.com",
+    "currency": "USD",
+    "bill_to": {
+      "company": "Meridian Technologies Inc.",
+      "attention": "Accounts Payable",
+      "address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "email": "AP@meridiantech.com"
+    },
+    "ship_to": {
+      "company": "Meridian Technologies Inc.",
+      "attention": "IT Receiving - Attn: David Chen",
+      "address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "email": "david.chen@meridiantech.com"
+    },
+    "line_items": [
+      {
+        "line_number": 1,
+        "supplier_part_number": "7458923",
+        "manufacturer_part_number": "21FA000GUS",
+        "description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, Win 11 Pro, 3-Year Premier Onsite Warranty",
+        "quantity": 25,
+        "unit_of_measure": "Each",
+        "unit_price": 2650.00,
+        "extended_price": 66250.00
+      },
+      {
+        "line_number": 2,
+        "supplier_part_number": "7129456",
+        "manufacturer_part_number": "40B00135US",
+        "description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD",
+        "quantity": 25,
+        "unit_of_measure": "Each",
+        "unit_price": 200.00,
+        "extended_price": 5000.00
+      }
+    ],
+    "subtotal": 71250.00,
+    "shipping_amount": 0.00,
+    "estimated_tax": 4631.25,
+    "total": 75881.25,
+    "supplier_name": "CDW Corporation"
+  }
+}

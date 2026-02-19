@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Master Service Agreement (MSA)",
+  "description": "Parsed MSA/contract (PDF/Word). Used by Check 8 (payment terms), Check 10 (contract channel, contract reference). Informs policy for price protection, max value, lead times, warranties.",
+  "type": "object",
+  "required": ["agreement_id", "effective_date", "buyer_name", "supplier_name"],
+  "properties": {
+    "source_file_name": { "type": "string", "description": "Attachment file name (e.g. MSA-CDW-2024-0156_Executed.pdf)." },
+    "agreement_id": { "type": "string", "description": "Contract identifier (e.g. MSA-CDW-2024-0156). Check 8, 10." },
+    "document_type": { "type": "string", "enum": ["Master Service Agreement", "Contract", "Other"] },
+    "effective_date": { "type": "string", "format": "date", "description": "Agreement start." },
+    "end_date": { "type": "string", "format": "date", "description": "Initial term end (e.g. 2026-12-31)." },
+    "renewal_terms": { "type": "string", "description": "e.g. Automatic 1-year renewal, 90 days notice for non-renewal." },
+    "buyer_name": { "type": "string", "description": "Customer/legal entity name." },
+    "buyer_address": { "type": "string" },
+    "supplier_name": { "type": "string", "description": "Supplier/vendor name. Check 3, 10." },
+    "supplier_address": { "type": "string" },
+    "scope_categories": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Covered categories (e.g. IT Hardware: End User Computing, IT Software, Professional Services)."
+    },
+    "scope_entities": { "type": "array", "items": { "type": "string" }, "description": "Covered company codes/subsidiaries (e.g. 1000)." },
+    "ordering_po_required": { "type": "boolean", "description": "PO required; must reference agreement number." },
+    "payment_terms_standard": { "type": "string", "description": "e.g. Net Thirty (30) days. Check 8 (PR terms must comply)." },
+    "invoicing_upon_shipment": { "type": "boolean" },
+    "invoice_po_reference_required": { "type": "boolean", "description": "Invoice must reference PO." },
+    "payment_method": { "type": "string", "description": "e.g. ACH electronic transfer." },
+    "price_protection_days": { "type": "integer", "description": "Prices firm for N days from quotation. Check 6 context." },
+    "msrp_change_notice_days": { "type": "integer", "description": "Supplier must give N days notice of MSRP changes." },
+    "volume_tiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tier_name": { "type": "string" },
+          "quantity_min": { "type": "integer" },
+          "quantity_max": { "type": "integer" },
+          "discount_range_min_pct": { "type": "number" },
+          "discount_range_max_pct": { "type": "number" }
+        }
+      }
+    },
+    "maximum_contract_value": { "type": "number", "description": "Cap on aggregate PO value during term (e.g. 5000000)." },
+    "maximum_contract_value_currency": { "type": "string", "default": "USD" },
+    "shipping_terms": { "type": "string", "description": "e.g. FOB Destination." },
+    "shipping_included_threshold_amount": { "type": "number", "description": "e.g. 5000 — orders above get free ground shipping." },
+    "shipping_included_region": { "type": "string", "description": "e.g. Continental United States." },
+    "lead_time_in_stock_days_min": { "type": "integer", "description": "e.g. 5." },
+    "lead_time_in_stock_days_max": { "type": "integer", "description": "e.g. 10." },
+    "lead_time_custom_days_min": { "type": "integer", "description": "e.g. 20." },
+    "lead_time_custom_days_max": { "type": "integer", "description": "e.g. 30." },
+    "delivery_notification_days": { "type": "integer", "description": "Supplier must notify if delivery date cannot be met (e.g. 2 business days)." },
+    "manufacturer_warranty": { "type": "string", "description": "Standard OEM warranty; supplier coordinates claims." },
+    "extended_warranty_available": { "type": "boolean", "description": "Extended/premier as PO line item." },
+    "return_days": { "type": "integer", "description": "e.g. 30 days from delivery." },
+    "restocking_fee_pct": { "type": "number", "description": "e.g. 15 for opened items." },
+    "non_returnable_types": { "type": "array", "items": { "type": "string" }, "description": "e.g. Custom-configured units, software licenses." },
+    "termination_notice_days": { "type": "integer", "description": "For convenience (e.g. 90)." },
+    "termination_cure_days": { "type": "integer", "description": "For cause — cure period (e.g. 30)." },
+    "governing_law": { "type": "string", "description": "e.g. Commonwealth of Massachusetts." },
+    "insurance_min_coverage": { "type": "number", "description": "e.g. 5000000 per occurrence." },
+    "signatories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "party": { "type": "string" },
+          "name": { "type": "string" },
+          "title": { "type": "string" },
+          "signature_date": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "executed_date": { "type": "string", "format": "date", "description": "Effective execution date." },
+    "extraction_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "example": {
+    "source_file_name": "MSA-CDW-2024-0156_Executed.pdf",
+    "agreement_id": "MSA-CDW-2024-0156",
+    "document_type": "Master Service Agreement",
+    "effective_date": "2024-01-01",
+    "end_date": "2026-12-31",
+    "renewal_terms": "Automatic renewal for successive one (1) year periods; 90 days written notice for non-renewal.",
+    "buyer_name": "Meridian Technologies Inc.",
+    "buyer_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+    "supplier_name": "CDW Corporation",
+    "supplier_address": "75 Tri-State International, Lincolnshire, IL 60069",
+    "scope_categories": [
+      "IT Hardware: End User Computing (laptops, desktops, workstations, monitors, peripherals, docking stations)",
+      "IT Hardware: Networking Equipment",
+      "IT Hardware: Data Center Equipment",
+      "IT Software: Licensing",
+      "Related Professional Services: installation, configuration, warranty coordination, asset disposal"
+    ],
+    "scope_entities": ["1000"],
+    "ordering_po_required": true,
+    "payment_terms_standard": "Net Thirty (30) days from date of valid, undisputed invoice",
+    "invoicing_upon_shipment": true,
+    "invoice_po_reference_required": true,
+    "payment_method": "ACH electronic transfer",
+    "price_protection_days": 90,
+    "msrp_change_notice_days": 30,
+    "maximum_contract_value": 5000000.00,
+    "maximum_contract_value_currency": "USD",
+    "shipping_terms": "FOB Destination",
+    "shipping_included_threshold_amount": 5000.00,
+    "shipping_included_region": "Continental United States",
+    "lead_time_in_stock_days_min": 5,
+    "lead_time_in_stock_days_max": 10,
+    "lead_time_custom_days_min": 20,
+    "lead_time_custom_days_max": 30,
+    "delivery_notification_days": 2,
+    "manufacturer_warranty": "Standard OEM; Supplier coordinates warranty claims at no additional charge",
+    "extended_warranty_available": true,
+    "return_days": 30,
+    "restocking_fee_pct": 15,
+    "non_returnable_types": ["Custom-configured units", "Software licenses"],
+    "termination_notice_days": 90,
+    "termination_cure_days": 30,
+    "governing_law": "Commonwealth of Massachusetts",
+    "insurance_min_coverage": 5000000,
+    "signatories": [
+      { "party": "Meridian Technologies Inc.", "name": "Karen Williams", "title": "VP Procurement", "signature_date": "2024-01-01" },
+      { "party": "CDW Corporation", "name": "Thomas Reardon", "title": "VP Enterprise Sales", "signature_date": "2023-12-28" }
+    ],
+    "executed_date": "2024-01-01"
+  }
+}
