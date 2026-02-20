@@ -1,0 +1,150 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PR (Purchase Requisition)",
+  "description": "Single PR template: header + attachments + line items. Used by compliance checks 1–12 and system prompts. Replaces pr_header, pr_line_items, pr_attachments.",
+  "type": "object",
+  "required": ["header", "attachments", "line_items"],
+  "properties": {
+    "header": {
+      "type": "object",
+      "required": ["pr_number", "pr_status", "pr_created_date", "total_estimated_value", "currency"],
+      "properties": {
+        "pr_number": { "type": "string", "description": "Unique PR identifier (e.g. PR-2026-007842)." },
+        "pr_status": { "type": "string", "enum": ["Draft", "Submitted", "In Review", "Approved", "Rejected"], "description": "Current PR status." },
+        "pr_created_date": { "type": "string", "format": "date", "description": "PR creation date. Check 2 (dates), Check 11 (ATF), Check 12 (lead time)." },
+        "pr_creator": { "type": "string", "description": "User who created the PR." },
+        "requestor_name": { "type": "string", "description": "Requestor full name." },
+        "requestor_email": { "type": "string", "format": "email", "description": "Requestor email." },
+        "department": { "type": "string", "description": "Requesting department." },
+        "cost_center": { "type": "string", "description": "Cost center code (e.g. CC-4120-ENG)." },
+        "cost_center_name": { "type": "string", "description": "Cost center display name." },
+        "company_code": { "type": "string", "description": "Company/legal entity code (e.g. 1000)." },
+        "company_name": { "type": "string", "description": "Company/legal entity name." },
+        "plant_ship_to": { "type": "string", "description": "Plant or ship-to location ID." },
+        "ship_to_address": { "type": "string", "description": "Full ship-to address." },
+        "currency": { "type": "string", "description": "Currency code (e.g. USD). Check 7." },
+        "total_estimated_value": { "type": "number", "description": "Total PR value. Check 6." },
+        "justification_text": { "type": "string", "description": "Business justification." },
+        "urgency_flag": { "type": "string", "enum": ["Low", "Normal", "High", "Critical"], "description": "Urgency." },
+        "framework_order": { "type": "boolean", "description": "Whether this is a framework/contract order." },
+        "region": { "type": "string", "description": "Region (e.g. US-East)." },
+        "payment_terms_pr": { "type": "string", "description": "Payment terms on PR (e.g. Net 30). Check 8." },
+        "need_by_date": { "type": "string", "format": "date", "description": "Required delivery date. Check 12." },
+        "approval_flow": { "type": "string", "description": "Approval path (L1 -> L2 -> …)." },
+        "cnp_required": { "type": "boolean", "description": "Central/Corporate NP approval required." },
+        "cnp_approver": { "type": "string", "description": "CNP approver name." },
+        "pr_comments": { "type": "string", "description": "Comments on the PR." },
+        "number_of_attachments": { "type": "integer", "minimum": 0, "description": "Count of attachments. Check 1." },
+        "buying_channel": { "type": "string", "enum": ["Catalog", "Contract", "Spot", "Other"], "description": "Channel used. Check 10." },
+        "contract_reference": { "type": "string", "description": "Contract/MSA reference if channel is Contract. Check 8, 10." },
+        "category_l1": { "type": "string", "description": "Category L1 (e.g. IT). Check 9." },
+        "category_l2": { "type": "string", "description": "Category L2 (e.g. IT Hardware)." },
+        "category_l3": { "type": "string", "description": "Category L3 (e.g. End User Computing)." },
+        "category_l4": { "type": "string", "description": "Category L4 / category card. Check 9, 12." }
+      }
+    },
+    "attachments": {
+      "type": "object",
+      "required": ["attachment_count", "attachments"],
+      "properties": {
+        "attachment_count": { "type": "integer", "minimum": 0, "description": "Total count. Check 1." },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["attachment_number", "file_name", "file_type", "document_classification"],
+            "properties": {
+              "attachment_number": { "type": "integer", "description": "Sequence (1, 2, 3, …)." },
+              "file_name": { "type": "string", "description": "Original file name." },
+              "file_type": { "type": "string", "enum": ["PDF", "Excel", "Word", "Other"], "description": "File format." },
+              "document_classification": { "type": "string", "enum": ["Supplier Quotation", "Master Service Agreement / Contract Services", "Competitive Quote Comparison", "Technical Evaluation / Business Case", "SOW", "Invoice", "Other"], "description": "Agent-classified type. Check 1, 11." },
+              "classification_confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "Confidence of classification." },
+              "uploaded_by": { "type": "string", "description": "User who uploaded." },
+              "upload_date": { "type": "string", "format": "date", "description": "Upload date. Check 11." },
+              "file_size_kb": { "type": "number", "description": "File size in KB." },
+              "description": { "type": "string", "description": "Human or system description of document content." },
+              "document_date": { "type": "string", "format": "date", "description": "Date on document. Check 2, 11." },
+              "s3_key_or_path": { "type": "string", "description": "Storage path for pipeline (optional)." }
+            }
+          }
+        }
+      }
+    },
+    "line_items": {
+      "type": "array",
+      "description": "PR line items. Checks 4, 5, 6, 9, 12.",
+      "items": {
+        "type": "object",
+        "required": ["line_number", "quantity", "unit_of_measure", "unit_price_usd", "extended_amount_usd"],
+        "properties": {
+          "line_number": { "type": "integer", "description": "Line sequence (10, 20, …)." },
+          "item_short_description": { "type": "string", "description": "Short item description. Check 4." },
+          "item_long_description": { "type": "string", "description": "Full spec; semantic match Check 4." },
+          "material_number": { "type": "string", "description": "Internal/material number." },
+          "commodity_code": { "type": "string", "description": "Commodity code. Check 9." },
+          "category_l1": { "type": "string" },
+          "category_l2": { "type": "string" },
+          "category_l3": { "type": "string" },
+          "category_l4": { "type": "string", "description": "Category for Check 9, 10, 12." },
+          "quantity": { "type": "number", "description": "Quantity. Check 5." },
+          "unit_of_measure": { "type": "string", "description": "UOM (e.g. Each, Hours). Check 5." },
+          "unit_price_usd": { "type": "number", "description": "Unit price. Check 6." },
+          "extended_amount_usd": { "type": "number", "description": "Line total. Check 6." },
+          "suggested_supplier_id": { "type": "string", "description": "Supplier ID. Check 3." },
+          "suggested_supplier_name": { "type": "string", "description": "Supplier name. Check 3." },
+          "need_by_date_line": { "type": "string", "format": "date", "description": "Line-level need-by. Check 12." },
+          "delivery_address": { "type": "string", "description": "Delivery address for this line." },
+          "asset_tag_required": { "type": "boolean", "description": "Asset tag required (e.g. for IT hardware)." },
+          "notes": { "type": "string", "description": "Line-level notes." }
+        }
+      }
+    }
+  },
+  "example": {
+    "header": {
+      "pr_number": "PR-2026-007842",
+      "pr_status": "Submitted",
+      "pr_created_date": "2026-01-15",
+      "pr_creator": "Martinez, Sofia",
+      "requestor_name": "Chen, David",
+      "requestor_email": "david.chen@meridiantech.com",
+      "department": "Engineering — Platform Infrastructure",
+      "cost_center": "CC-4120-ENG",
+      "company_code": "1000",
+      "company_name": "Meridian Technologies Inc.",
+      "plant_ship_to": "Plant 1000-Boston",
+      "ship_to_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "currency": "USD",
+      "total_estimated_value": 571250,
+      "justification_text": "Annual laptop refresh for Platform Engineering team (25 engineers)...",
+      "urgency_flag": "Normal",
+      "framework_order": false,
+      "region": "US-East",
+      "payment_terms_pr": "Net 30",
+      "need_by_date": "2026-02-20",
+      "approval_flow": "L1: Martinez, Sofia (Auto) -> L2: Chen, David ($0-25K) -> L3: Patel, Raj ($25K-75K) -> L4: CNP - Williams, Karen (>$50K IT Hardware)",
+      "cnp_required": true,
+      "cnp_approver": "Williams, Karen (VP Procurement)",
+      "number_of_attachments": 4,
+      "buying_channel": "Contract",
+      "contract_reference": "MSA-CDW-2024-0156",
+      "category_l1": "IT",
+      "category_l2": "IT Hardware",
+      "category_l3": "End User Computing",
+      "category_l4": "Laptops & Workstations"
+    },
+    "attachments": {
+      "attachment_count": 4,
+      "attachments": [
+        { "attachment_number": 1, "file_name": "CDW_Quote_Q25-0847_Meridian_ThinkPad_P16.pdf", "file_type": "PDF", "document_classification": "Supplier Quotation", "classification_confidence": 0.94, "uploaded_by": "Martinez, Sofia", "upload_date": "2026-01-14", "file_size_kb": 342, "description": "CDW formal quotation for 25x ThinkPad P16 Gen 2 + 25x TB4 docks. Valid through 03/15/2026." },
+        { "attachment_number": 2, "file_name": "MSA-CDW-2024-0156_Executed.pdf", "file_type": "PDF", "document_classification": "Master Service Agreement / Contract Services", "classification_confidence": 0.98, "uploaded_by": "Procurement Shared Services", "upload_date": "2024-03-01", "file_size_kb": 1280, "description": "Executed MSA with CDW Corporation. Effective 01/01/2024 through 12/31/2026." },
+        { "attachment_number": 3, "file_name": "Competitive_Quotes_Summary_IT-HW-Jan2026.xlsx", "file_type": "Excel", "document_classification": "Competitive Quote Comparison", "classification_confidence": 0.89 },
+        { "attachment_number": 4, "file_name": "ThinkPad_P16_Gen2_Tech_Eval_Engineering.pdf", "file_type": "PDF", "document_classification": "Technical Evaluation / Business Case", "classification_confidence": 0.91 }
+      ]
+    },
+    "line_items": [
+      { "line_number": 10, "item_short_description": "Lenovo ThinkPad P16 Gen 2 — i7/32GB/1TB/RTX A1000", "item_long_description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX, 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS, Windows 11 Pro, 3-Year Premier Onsite.", "material_number": "MAT-IT-00472", "commodity_code": "43211500", "category_l1": "IT", "category_l2": "IT Hardware", "category_l3": "End User Computing", "category_l4": "Laptops & Workstations", "quantity": 25, "unit_of_measure": "Each", "unit_price_usd": 2650, "extended_amount_usd": 66250, "suggested_supplier_id": "V-10042", "suggested_supplier_name": "CDW Corporation", "need_by_date_line": "2026-02-28", "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210", "asset_tag_required": true, "notes": "Config per Engineering standard build." },
+      { "line_number": 20, "item_short_description": "Lenovo ThinkPad Thunderbolt 4 Dock — 40B00135US", "item_long_description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD.", "material_number": "MAT-IT-00519", "commodity_code": "43211500", "category_l1": "IT", "category_l2": "IT Hardware", "category_l3": "End User Computing", "category_l4": "Docking Stations & Peripherals", "quantity": 25, "unit_of_measure": "Each", "unit_price_usd": 200, "extended_amount_usd": 5000, "suggested_supplier_id": "V-10042", "suggested_supplier_name": "CDW Corporation", "need_by_date_line": "2026-02-28", "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210", "asset_tag_required": false, "notes": "Bundle with laptop order." }
+    ]
+  }
+}

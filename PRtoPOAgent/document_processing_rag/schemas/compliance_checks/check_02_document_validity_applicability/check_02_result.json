@@ -1,132 +1,80 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Check 2: Document Validity & Applicability — Result",
-  "description": "Output of Check 2. Verifies each document is VALID (dates, status) and APPLICABLE (supplier, entity, category). Requires extracted fields from Quote/Contract/SOW. Ref: PR_Compliance_Check1_Check2_Fields.md §2.",
+  "title": "Check 2: Document Validity — Dates & Timings Only — Result",
+  "description": "Output of Check 2. Verifies document dates and date ranges only: quote date vs PR date, quote validity/expiry, contract effective/expiry, delivery period. No supplier/currency/total match here — those are in other checks. Ref: PR_Compliance_Check1_Check2_Fields.md §2 (date rules only).",
   "type": "object",
   "required": ["check_id", "check_name", "check_2_status"],
   "properties": {
     "check_id": { "type": "string", "const": "check_02", "description": "Stable check identifier." },
-    "check_name": { "type": "string", "const": "Document Validity & Applicability", "description": "Display name." },
-    "check_2_status": {
-      "type": "string",
-      "enum": ["PASS", "FAIL", "NEEDS_REVIEW"],
-      "description": "Overall result. PASS = all validity/applicability rules pass; FAIL = e.g. expired quote, wrong entity; NEEDS_REVIEW = e.g. expiration approaching, fuzzy supplier match."
-    },
-    "summary_description": { "type": "string", "description": "Short summary for UI (e.g. 'Quote date valid but expiration approaching')." },
+    "check_name": { "type": "string", "const": "Document Validity — Dates & Timings", "description": "Display name." },
+    "check_2_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result. PASS = all date/timing rules pass; FAIL = e.g. expired quote, quote date after PR date; NEEDS_REVIEW = e.g. expiration approaching." },
+    "summary_description": { "type": "string", "description": "Short summary for UI (e.g. 'All dates and timings valid')." },
     "quotation_validity": {
       "type": "object",
-      "description": "Results for quotation validity rules (§2.2).",
+      "description": "Quotation date/timing rules only.",
       "properties": {
         "quote_date_sequence_pass": { "type": "boolean", "description": "Quote date <= PR date." },
-        "quote_not_expired_pass": { "type": "boolean", "description": "Validity/expiry date >= PR date." },
-        "quote_staleness_warning": { "type": "boolean", "description": "True if quote is stale per policy (e.g. > 60 days)." },
-        "quote_addressee_match_pass": { "type": "boolean", "description": "Quote addressed to correct legal entity." },
-        "quote_currency_match_pass": { "type": "boolean", "description": "Quote currency matches PR currency." },
-        "quote_total_match_pass": { "type": "boolean", "description": "Quote total within tolerance of PR total." },
-        "quote_supplier_match_pass": { "type": "boolean", "description": "Supplier on quote matches PR supplier (fuzzy >= 85%)." }
+        "quote_not_expired_pass": { "type": "boolean", "description": "Quote validity/expiry date >= PR date." },
+        "quote_staleness_warning": { "type": "boolean", "description": "True if quote is stale per policy (e.g. > 60 days)." }
       }
     },
     "contract_validity": {
       "type": "object",
-      "description": "Results for contract validity rules (§2.3) when contract is attached or referenced.",
+      "description": "Contract date/timing rules when contract is attached or referenced.",
       "properties": {
-        "contract_effective_pass": { "type": "boolean" },
-        "contract_not_expired_pass": { "type": "boolean" },
-        "covers_delivery_period_warning": { "type": "boolean" },
-        "contract_status_active_pass": { "type": "boolean" },
-        "ceiling_not_exceeded_pass": { "type": "boolean" },
-        "near_expiry_warning": { "type": "boolean" },
-        "near_ceiling_warning": { "type": "boolean" }
-      }
-    },
-    "applicability": {
-      "type": "object",
-      "description": "Coverage/applicability rules (§2.4).",
-      "properties": {
-        "entity_coverage_pass": { "type": "boolean", "description": "Contract/SOW covers PR company code." },
-        "category_coverage_pass": { "type": "boolean" },
-        "geographic_coverage_pass": { "type": "boolean" },
-        "supplier_in_master_pass": { "type": "boolean" },
-        "supplier_status_active_pass": { "type": "boolean" }
+        "contract_effective_pass": { "type": "boolean", "description": "Contract effective date <= PR date." },
+        "contract_not_expired_pass": { "type": "boolean", "description": "Contract expiration date >= PR date." },
+        "covers_delivery_period_warning": { "type": "boolean", "description": "True if contract may expire before PR need_by_date." },
+        "near_expiry_warning": { "type": "boolean", "description": "True if contract expires soon (e.g. within 30/60/90 days)." }
       }
     },
     "sub_checks": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "passed": { "type": "boolean" }
-        }
-      },
-      "description": "For UI: e.g. Quote date before PR date, expiration after PR date; Document applies to same supplier and legal entity."
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } },
+      "description": "For UI: e.g. Quote date before PR date; Quote not expired; Contract effective/not expired."
     },
     "field_level_assessment": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "field_name": { "type": "string" },
-          "status": { "type": "string", "enum": ["pass", "fail", "review"] },
-          "confidence": { "type": "number" },
-          "detail": { "type": "string" }
-        }
-      },
-      "description": "For UI: Quote Date, Quote Expiration Date, Supplier, etc."
+      "items": { "type": "object", "properties": { "field_name": { "type": "string" }, "status": { "type": "string", "enum": ["pass", "fail", "review"] }, "confidence": { "type": "number" }, "detail": { "type": "string" } } },
+      "description": "For UI: Quote Date, Quote Expiration, Contract Effective/Expiry, etc."
     },
     "evidence": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "field": { "type": "string" },
-          "extracted_value": { "type": "string" },
-          "pr_value": { "type": "string" },
-          "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] }
-        }
-      }
+      "items": { "type": "object", "properties": { "field": { "type": "string" }, "extracted_value": { "type": "string" }, "pr_value": { "type": "string" }, "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] } } }
     },
-    "policy_reference": { "type": "string", "description": "e.g. Procurement Policy v3.2, Section 3.2" },
-    "agent_recommendation": { "type": "string", "description": "Optional recommendation when NEEDS_REVIEW or FAIL." }
+    "policy_reference": { "type": "string", "description": "e.g. Procurement Policy v3.2, Section 3.2 (dates & timings)." },
+    "agent_recommendation": { "type": "string", "description": "Optional recommendation when NEEDS_REVIEW or FAIL (e.g. refresh quote, extend contract)." }
   },
   "example": {
     "check_id": "check_02",
-    "check_name": "Document Validity & Applicability",
-    "check_2_status": "NEEDS_REVIEW",
-    "summary_description": "Quote date valid but expiration approaching",
+    "check_name": "Document Validity — Dates & Timings",
+    "check_2_status": "PASS",
+    "summary_description": "All document dates and timings valid; quote and contract in effect for PR date.",
     "quotation_validity": {
       "quote_date_sequence_pass": true,
       "quote_not_expired_pass": true,
-      "quote_staleness_warning": false,
-      "quote_addressee_match_pass": true,
-      "quote_currency_match_pass": true,
-      "quote_total_match_pass": true,
-      "quote_supplier_match_pass": null
+      "quote_staleness_warning": false
+    },
+    "contract_validity": {
+      "contract_effective_pass": true,
+      "contract_not_expired_pass": true,
+      "covers_delivery_period_warning": false,
+      "near_expiry_warning": false
     },
     "sub_checks": [
-      { "name": "Quote date before PR date, expiration after PR date", "passed": false },
-      { "name": "Document applies to same supplier and legal entity", "passed": true }
+      { "name": "Quote date on or before PR date", "passed": true },
+      { "name": "Quote not expired as of PR date", "passed": true },
+      { "name": "Contract effective and not expired", "passed": true }
     ],
     "field_level_assessment": [
-      {
-        "field_name": "Quote Date",
-        "status": "pass",
-        "confidence": 0.98,
-        "detail": "Quote dated Jan 10, 2026 (before PR date)"
-      },
-      {
-        "field_name": "Quote Expiration Date",
-        "status": "pass",
-        "confidence": 0.96,
-        "detail": "Valid until Feb 10, 2026 (15 days remaining)"
-      }
+      { "field_name": "Quote Date", "status": "pass", "confidence": 0.98, "detail": "Quote dated 2026-01-13 (before PR date 2026-01-15)." },
+      { "field_name": "Quote Expiration", "status": "pass", "confidence": 0.96, "detail": "Valid through 2026-03-15." }
     ],
     "evidence": [
-      { "field": "Quote Date", "extracted_value": "Jan 10, 2026 (98%)", "pr_value": "PR Date: Jan 26, 2026", "match": "Match" },
-      { "field": "Quote Expiration", "extracted_value": "Feb 10, 2026 (96%)", "pr_value": "Required: After Jan 26", "match": "Partial" },
-      { "field": "Supplier", "extracted_value": "Acme Consulting LLC (78%)", "pr_value": "ACME Corp", "match": "Partial" }
+      { "field": "Quote Date", "extracted_value": "2026-01-13", "pr_value": "PR Date: 2026-01-15", "match": "Match" },
+      { "field": "Quote Expiration", "extracted_value": "2026-03-15", "pr_value": "Required: >= 2026-01-15", "match": "Match" }
     ],
-    "policy_reference": "Procurement Policy v3.2, Section 3.2",
-    "agent_recommendation": "Quote expires in 15 days. Consider requesting refreshed quote before PO placement."
+    "policy_reference": "Procurement Policy v3.2, Section 3.2 (dates & timings).",
+    "agent_recommendation": null
   }
 }
