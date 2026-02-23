@@ -29,5 +29,8 @@ python-dotenv>=1.0.0
 # Optional: Word docs
 # python-docx>=1.0.0
 
+# Optional: Excel (for PR form / header+line items extraction and classification)
+openpyxl>=3.0.0
+
 # Optional: local embeddings (for RAG later)
 # sentence-transformers>=2.2.0

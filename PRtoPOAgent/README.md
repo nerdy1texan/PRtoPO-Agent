@@ -475,7 +475,7 @@ PR to PO Agent/
 │   ├── DEVELOPMENT_TIMELINE.md        ← Product/timeline
 │   ├── ENGINEERING_AWS.md             ← AWS build guide (ECS, Step Functions, RDS, etc.)
 │   ├── PR_to_PO_Test.ipynb            ← Demo notebook (upload → classify; uses pr.json)
-│   ├── _PR_to_PO_Master.ipynb         ← (Optional) Full pipeline (parse → DB → Check 1 & 2); uses pr.json, Check 2 dates-only
+│   ├── PR_to_PO_Master.ipynb          ← Full pipeline (upload → classify → parse → DB → Check 1 & 2); uses pr.json, Check 2 dates-only
 │   └── schemas/
 │       ├── pr.json
 │       ├── quote.json

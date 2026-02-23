@@ -1,0 +1,79 @@
+{
+  "check_id": "check_01",
+  "check_name": "Attachment Existence & Classification",
+  "check_1_status": "PASS",
+  "attachments_found": 4,
+  "classified_documents": [
+    {
+      "filename": "01_PR_Header_and_LineItems.xlsx",
+      "document_type": "PR Form",
+      "confidence": 0.99,
+      "reason": "Excel with sheets PR Header, PR Line Items, PR Attachments; columns PR Number, PR Status, Requestor Name, Total Estimated Value, Line Items, Ship-To Address."
+    },
+    {
+      "filename": "02_CDW_Quote_Q25-0847.pdf",
+      "document_type": "Quotation",
+      "confidence": 0.95,
+      "reason": "Quote number, account number, quote date, line items with prices, supplier letterhead."
+    },
+    {
+      "filename": "02b_MSA_CDW_2024_0156_Executed.pdf",
+      "document_type": "Contract",
+      "confidence": 0.99,
+      "reason": "Agreement, parties, effective/expiry date, scope of products and services."
+    }
+  ],
+  "valid_support_docs_found": 3,
+  "policy_requirements_met": true,
+  "missing_requirements": [],
+  "invoice_detected": false,
+  "sub_checks": [
+    {
+      "name": "At least one attachment exists on PR",
+      "passed": true
+    },
+    {
+      "name": "Agent classified attachment as Quote/SOW/Contract",
+      "passed": true
+    },
+    {
+      "name": "Required documents for value tier present",
+      "passed": true
+    }
+  ],
+  "field_level_assessment": [
+    {
+      "field_name": "Attachment Count",
+      "status": "pass",
+      "confidence": 1.0,
+      "detail": "4 documents attached (meets minimum requirement)"
+    },
+    {
+      "field_name": "Quote Document Type",
+      "status": "pass",
+      "confidence": 0.95,
+      "detail": "02_CDW_Quote_Q25-0847.pdf classified as Quotation"
+    },
+    {
+      "field_name": "Contract Document Type",
+      "status": "pass",
+      "confidence": 0.99,
+      "detail": "02b_MSA_CDW_2024_0156_Executed.pdf classified as Contract"
+    }
+  ],
+  "evidence": [
+    {
+      "field": "Attachments Found",
+      "extracted_value": "4 documents",
+      "pr_value": "Required: \u22651",
+      "match": "Match"
+    },
+    {
+      "field": "Document Types",
+      "extracted_value": "PR Form (99%), Quotation (95%), Contract (99%)",
+      "pr_value": "Expected: Quotation or Contract",
+      "match": "Match"
+    }
+  ],
+  "policy_reference": "Procurement Policy v3.2, Section 3.1"
+}
