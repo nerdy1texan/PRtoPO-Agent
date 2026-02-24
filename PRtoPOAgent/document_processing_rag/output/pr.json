@@ -1,0 +1,104 @@
+{
+  "header": {
+    "pr_number": "PR-2026-007842",
+    "pr_status": "Submitted",
+    "pr_created_date": "2026-01-15",
+    "pr_creator": "Martinez, Sofia",
+    "requestor_name": "Chen, David",
+    "requestor_email": "david.chen@meridiantech.com",
+    "department": "Engineering \u2014 Platform Infrastructure",
+    "cost_center": "CC-4120-ENG",
+    "company_code": "1000",
+    "company_name": "Meridian Technologies Inc.",
+    "plant_ship_to": "Plant 1000-Boston",
+    "ship_to_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+    "currency": "USD",
+    "total_estimated_value": 571250,
+    "justification_text": "Annual laptop refresh for Platform Engineering team (25 engineers)...",
+    "urgency_flag": "Normal",
+    "framework_order": false,
+    "region": "US-East",
+    "payment_terms_pr": "Net 30",
+    "need_by_date": "2026-02-20",
+    "approval_flow": "L1: Martinez, Sofia (Auto) -> L2: Chen, David ($0-25K) -> L3: Patel, Raj ($25K-75K) -> L4: CNP - Williams, Karen (>$50K IT Hardware)",
+    "cnp_required": true,
+    "cnp_approver": "Williams, Karen (VP Procurement)",
+    "number_of_attachments": 4,
+    "buying_channel": "Contract",
+    "contract_reference": "MSA-CDW-2024-0156",
+    "category_l1": "IT",
+    "category_l2": "IT Hardware",
+    "category_l3": "End User Computing",
+    "category_l4": "Laptops & Workstations"
+  },
+  "attachments": {
+    "attachment_count": 3,
+    "attachments": [
+      {
+        "attachment_number": 1,
+        "file_name": "01_PR_Header_and_LineItems.xlsx",
+        "file_type": "Excel",
+        "document_classification": "Other",
+        "classification_confidence": 0.99
+      },
+      {
+        "attachment_number": 2,
+        "file_name": "02_CDW_Quote_Q25-0847.pdf",
+        "file_type": "PDF",
+        "document_classification": "Supplier Quotation",
+        "classification_confidence": 0.95
+      },
+      {
+        "attachment_number": 3,
+        "file_name": "02b_MSA_CDW_2024_0156_Executed.pdf",
+        "file_type": "PDF",
+        "document_classification": "Master Service Agreement / Contract Services",
+        "classification_confidence": 0.99
+      }
+    ]
+  },
+  "line_items": [
+    {
+      "line_number": 10,
+      "item_short_description": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
+      "item_long_description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX, 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS, Windows 11 Pro, 3-Year Premier Onsite.",
+      "material_number": "MAT-IT-00472",
+      "commodity_code": "43211500",
+      "category_l1": "IT",
+      "category_l2": "IT Hardware",
+      "category_l3": "End User Computing",
+      "category_l4": "Laptops & Workstations",
+      "quantity": 25,
+      "unit_of_measure": "Each",
+      "unit_price_usd": 2650,
+      "extended_amount_usd": 66250,
+      "suggested_supplier_id": "V-10042",
+      "suggested_supplier_name": "CDW Corporation",
+      "need_by_date_line": "2026-02-28",
+      "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "asset_tag_required": true,
+      "notes": "Config per Engineering standard build."
+    },
+    {
+      "line_number": 20,
+      "item_short_description": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
+      "item_long_description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD.",
+      "material_number": "MAT-IT-00519",
+      "commodity_code": "43211500",
+      "category_l1": "IT",
+      "category_l2": "IT Hardware",
+      "category_l3": "End User Computing",
+      "category_l4": "Docking Stations & Peripherals",
+      "quantity": 25,
+      "unit_of_measure": "Each",
+      "unit_price_usd": 200,
+      "extended_amount_usd": 5000,
+      "suggested_supplier_id": "V-10042",
+      "suggested_supplier_name": "CDW Corporation",
+      "need_by_date_line": "2026-02-28",
+      "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "asset_tag_required": false,
+      "notes": "Bundle with laptop order."
+    }
+  ]
+}
