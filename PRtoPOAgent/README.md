@@ -9,21 +9,23 @@ This repo contains **schemas**, **compliance check specs**, **synthetic data**, 
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Architecture](#architecture)
-3. [Tech Stacks: Production vs Local](#tech-stacks-production-vs-local)
-4. [What Else Is Needed? (MCP, Vector Store, etc.)](#what-else-is-needed)
-5. [Schemas & Examples](#schemas--examples)
-6. [Compliance Checks](#compliance-checks)
-7. [System Prompts](#system-prompts)
-8. [Environment Variables](#environment-variables)
-9. [Repository Structure](#repository-structure)
-10. [References](#references)
+2. [Command-line setup (CMD and Git Bash)](#command-line-setup-windows-cmd-and-git-bash)
+3. [Venv environment setup (alternative to conda)](#venv-environment-setup-alternative-to-conda)
+4. [Architecture](#architecture)
+5. [Tech Stacks: Production vs Local](#tech-stacks-production-vs-local)
+6. [What Else Is Needed? (MCP, Vector Store, etc.)](#what-else-is-needed)
+7. [Schemas & Examples](#schemas--examples)
+8. [Compliance Checks](#compliance-checks)
+9. [System Prompts](#system-prompts)
+10. [Environment Variables](#environment-variables)
+11. [Repository Structure](#repository-structure)
+12. [References](#references)
 
 ---
 
 ## Getting Started
 
-Follow **Local setup** to run the notebook on your machine with Groq and **SQLite** (no database server install). Use **[DBeaver](https://dbeaver.io/)** to view and manage the local database. Follow **AWS setup** to run against Bedrock (and optional RDS) in the cloud.
+Choose **ENV_MODE**: **`aws`** (Bedrock + OpenSearch + Titan) or **`local`** (Groq + Qdrant Cloud + sentence-transformers). Copy **`document_processing_rag/.env.example`** to **`.env`** and set the required variables for your mode (Section 0 validates them). Follow **Local setup** for Groq + Qdrant + SQLite; follow **AWS setup** for Bedrock + OpenSearch + optional RDS. Use **[DBeaver](https://dbeaver.io/)** to view the structured database.
 
 ---
 
@@ -37,6 +39,8 @@ Follow **Local setup** to run the notebook on your machine with Groq and **SQLit
 ```bash
 # Create and activate a dedicated environment (Python 3.10+)
 conda create -n pr2po python=3.10 -y
+# If your company uses conda-forge (e.g. restricted default channels), use:
+# conda create -n pr2po -c conda-forge python=3.10 -y
 conda activate pr2po
 
 # Go to the folder with the notebook and requirements
@@ -94,23 +98,25 @@ If you prefer PostgreSQL locally, install PostgreSQL, create a database (e.g. `p
 
 #### 6. Environment variables (.env)
 
-In `document_processing_rag/`, create a `.env` file (do not commit it):
+In `document_processing_rag/`, copy `.env.example` to `.env` and set values (do not commit `.env`):
 
 ```bash
 cd document_processing_rag
-# Create .env (edit with your values)
+copy .env.example .env   # Windows
+# cp .env.example .env  # Git Bash / macOS / Linux
 ```
 
-Contents (minimum for local):
+For **local** mode, set at least:
 
 ```env
-# Required for local LLM
+ENV_MODE=local
 GROQ_API_KEY=gsk_your_groq_api_key_here
-
-# Optional: use PostgreSQL instead of SQLite (then connect with DBeaver to localhost)
-# DATABASE_URL=postgresql://pr2po_user:your_secure_password@localhost:5432/pr_validation
-# If you omit DATABASE_URL, the notebook uses SQLite (pr_validation.db); open it with DBeaver.
+QDRANT_URL=https://your-cluster-id.us-east-1-1.aws.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_cloud_api_key
 ```
+
+- Get **Groq** key at [Groq Console](https://console.groq.com/); get **Qdrant** URL and API key from [Qdrant Cloud](https://cloud.qdrant.io/) (create a cluster, then create an API key).
+- Optional: `QDRANT_COLLECTION_NAME=pr2po`, `DATABASE_URL=sqlite:///pr_validation.db` (default). See [Environment Variables](#environment-variables) and `.env.example` for the full list.
 
 #### 7. Run the notebook
 
@@ -119,23 +125,228 @@ GROQ_API_KEY=gsk_your_groq_api_key_here
    jupyter notebook PR_to_PO_Master.ipynb
    # or: jupyter lab
    ```
-2. Run cells in order: **Section 0** (env detection) → **1** (paths, LLM) → **2** (schemas) → **3** (list from input) → **4** (classify) → **5** (parse) → **6** (DB) → **7** (Check 1) → **8** (Check 2) → **9** (summary) → **10** (write outputs).
+2. Run cells in order: **Section 0** (env detection & validation) → **1** (paths, LLM) → **2** (schemas) → **3** (list from input) → **4** (classify) → **5** (parse) → **5b** (save parsed outputs to output/) → **6** (structured DB: single `pr` table + structured quote/MSA) → **7** (RAG: chunking, embeddings, vector store — OpenSearch or Qdrant) → **8** (agentic orchestrator: SQL + RAG, test question) → **9** (Check 1) → **10** (Check 2) → **11** (summary) → **12** (write check results).
 3. Results:
-   - **output/** — `pr.json` (single PR template: header + attachments + line_items), `parsed_quotes.json`, `parsed_msas.json`, `check1_result.json`, `check2_result.json`.
-   - **Database** — Same data in SQLite (`pr_validation.db`) or PostgreSQL if `DATABASE_URL` is set. Open with [DBeaver](https://dbeaver.io/) to browse tables.
+   - **output/** — `pr.json`, `parsed_quotes.json`, `parsed_msas.json` (saved in 5b); `check1_result.json`, `check2_result.json` (saved in 12).
+   - **Database** — Structured tables in SQLite (`pr_validation.db`) or PostgreSQL. Open with [DBeaver](https://dbeaver.io/) to browse **pr**, **parsed_quote**, **parsed_msa**.
+   - **Vector store** — Chunks indexed in Qdrant (local) or OpenSearch (AWS); used by the orchestrator in Section 8.
 
 **Quick start checklist (local)**
 
-1. Install Miniconda/Anaconda → `conda create -n pr2po python=3.10 -y` → `conda activate pr2po`
+1. **Environment:** **Conda** — `conda create -n pr2po python=3.10 -y` → `conda activate pr2po`. **Venv (alternative):** See [Venv environment setup](#venv-environment-setup-alternative-to-conda).
 2. `cd PRtoPOAgent/document_processing_rag` → `pip install -r requirements.txt`
-3. Create `.env` with `GROQ_API_KEY=gsk_...` (get key from [Groq](https://console.groq.com/))
-4. (Optional) Install [DBeaver](https://dbeaver.io/) to view the database later
-5. `jupyter notebook PR_to_PO_Master.ipynb` → run all cells in order (Section 0 through 10)
-6. Check **output/** for JSONs; open **pr_validation.db** in DBeaver (New Connection → SQLite → path to `pr_validation.db`) to browse tables
+3. Copy `.env.example` to `.env`; set **ENV_MODE=local**, **GROQ_API_KEY** ([Groq](https://console.groq.com/)), **QDRANT_URL** and **QDRANT_API_KEY** ([Qdrant Cloud](https://cloud.qdrant.io/)).
+4. (Optional) Install [DBeaver](https://dbeaver.io/) to view the database later.
+5. `jupyter notebook PR_to_PO_Master.ipynb` → run all cells in order (Section 0 through 12).
+6. Check **output/** for JSONs; open **pr_validation.db** in DBeaver; vector store is in Qdrant Cloud.
 
 ---
 
-### AWS setup (Bedrock, optional RDS)
+### Command-line setup (Windows CMD and Git Bash)
+
+Use these steps to set up the **conda** environment, install dependencies, and run the notebook from **Command Prompt (CMD)** or **Git Bash**. Commands are the same in both; paths work with either forward slashes or backslashes on Windows.
+
+#### 1. Open a terminal
+
+- **CMD:** Press `Win + R`, type `cmd`, Enter. Or open **Command Prompt** from the Start menu.
+- **Git Bash:** Right-click in the repo folder → **Git Bash Here**, or open **Git Bash** from the Start menu and `cd` to the repo.
+
+#### 2. Go to the repo root
+
+From your project root (adjust the path to match your machine):
+
+```bash
+# CMD or Git Bash — use your actual path
+cd M:\AI_consulting\2025\Bhavin\JSONs\PRtoPOAgent
+# Git Bash also accepts:
+# cd /m/AI_consulting/2025/Bhavin/JSONs/PRtoPOAgent
+```
+
+#### 3. Create and activate the conda environment
+
+```bash
+conda create -n pr2po python=3.10 -y
+# On company machines (restricted channels), use conda-forge:
+# conda create -n pr2po -c conda-forge python=3.10 -y
+conda activate pr2po
+```
+
+- **Company / conda-forge:** If your company limits default channels, use `conda create -n pr2po -c conda-forge python=3.10 -y` instead.
+- **Git Bash:** If `conda activate` fails, run `conda init bash`, close and reopen Git Bash, then run `conda activate pr2po` again.
+
+#### 4. Go to the notebook folder and install requirements
+
+```bash
+cd document_processing_rag
+pip install -r requirements.txt
+```
+
+#### 5. Create the `.env` file (first time only)
+
+Copy `.env.example` to `.env` in `document_processing_rag/` and set (for local):
+
+```env
+ENV_MODE=local
+GROQ_API_KEY=gsk_your_actual_key_here
+QDRANT_URL=https://your-cluster-id.us-east-1-1.aws.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_api_key
+```
+
+- **CMD:** `copy .env.example .env` then `notepad .env`.
+- **Git Bash:** `cp .env.example .env` then edit in VS Code/Cursor.
+
+#### 6. Run the notebook
+
+From `document_processing_rag/` (same folder as `requirements.txt` and `.env`):
+
+```bash
+# Start Jupyter and open the master notebook (browser opens)
+jupyter notebook PR_to_PO_Master.ipynb
+```
+
+Or use Jupyter Lab:
+
+```bash
+jupyter lab PR_to_PO_Master.ipynb
+```
+
+To run the **test** notebook (upload + classification only):
+
+```bash
+jupyter notebook PR_to_PO_Test.ipynb
+```
+
+#### 7. Run the notebook from the command line without opening the browser (optional)
+
+To execute all cells and save output from CMD or Git Bash:
+
+```bash
+# From document_processing_rag/
+jupyter nbconvert --to notebook --execute PR_to_PO_Master.ipynb --output PR_to_PO_Master_executed.ipynb
+```
+
+Or run and get a log only (no new file):
+
+```bash
+jupyter nbconvert --to notebook --execute PR_to_PO_Master.ipynb --ExecutePreprocessor.timeout=600 --stdout
+```
+
+#### Summary: one-time setup vs every session
+
+| Step | When |
+|------|------|
+| `conda create -n pr2po python=3.10 -y` (or `-c conda-forge` on company machines) | Once |
+| `conda activate pr2po` | Every new CMD/Git Bash window |
+| `cd document_processing_rag` | When you open a new terminal |
+| `pip install -r requirements.txt` | Once (or after changing requirements) |
+| Copy `.env.example` to `.env`; set `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY` | Once |
+| `jupyter notebook PR_to_PO_Master.ipynb` | Whenever you want to run the notebook |
+
+---
+
+### Venv environment setup (alternative to conda)
+
+If you prefer Python’s built-in **venv** instead of conda (e.g. no Miniconda/Anaconda, or company policy), use these steps. You need **Python 3.10+** on your PATH.
+
+#### 1. Open a terminal and go to the repo
+
+- **CMD or Git Bash (Windows):** Navigate to the repo root, then into `document_processing_rag`.
+- **macOS/Linux:** Same; use `cd` to your repo path.
+
+```bash
+cd M:\AI_consulting\2025\Bhavin\JSONs\PRtoPOAgent\document_processing_rag
+# Git Bash (Windows): cd /m/AI_consulting/2025/Bhavin/JSONs/PRtoPOAgent/document_processing_rag
+# macOS/Linux: cd /path/to/PRtoPOAgent/document_processing_rag
+```
+
+#### 2. Create the virtual environment
+
+From **document_processing_rag/** (same folder as `requirements.txt`):
+
+```bash
+python -m venv venv
+```
+
+This creates a `venv` folder there. To use a different name (e.g. `.venv`):
+
+```bash
+python -m venv .venv
+```
+
+#### 3. Activate the virtual environment
+
+Activation is different per shell:
+
+- **Windows CMD:**
+  ```cmd
+  venv\Scripts\activate.bat
+  ```
+  If you used `.venv`: `.venv\Scripts\activate.bat`
+
+- **Windows PowerShell:**
+  ```powershell
+  venv\Scripts\Activate.ps1
+  ```
+  If execution policy blocks scripts: `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` (one-time), then run the command again.
+
+- **Git Bash (Windows):**
+  ```bash
+  source venv/Scripts/activate
+  ```
+  If you used `.venv`: `source .venv/Scripts/activate`
+
+- **macOS / Linux:**
+  ```bash
+  source venv/bin/activate
+  ```
+  If you used `.venv`: `source .venv/bin/activate`
+
+When active, your prompt usually shows `(venv)` or `(.venv)`.
+
+#### 4. Install dependencies
+
+With the venv **activated** and still in **document_processing_rag/**:
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+#### 5. Create the `.env` file (first time only)
+
+In **document_processing_rag/**, copy `.env.example` to `.env` and set (for local): **ENV_MODE=local**, **GROQ_API_KEY**, **QDRANT_URL**, **QDRANT_API_KEY**. See `.env.example` for the full list.
+
+#### 6. Run the notebook
+
+From **document_processing_rag/** with the venv **activated**:
+
+```bash
+jupyter notebook PR_to_PO_Master.ipynb
+# or: jupyter lab PR_to_PO_Master.ipynb
+# Test notebook only: jupyter notebook PR_to_PO_Test.ipynb
+```
+
+Select the kernel that points to this venv (e.g. **Python 3 (venv)** or the path containing `venv`).
+
+#### 7. Optional: Run notebook from command line (no UI)
+
+```bash
+jupyter nbconvert --to notebook --execute PR_to_PO_Master.ipynb --output PR_to_PO_Master_executed.ipynb
+```
+
+#### Summary: venv one-time vs every session
+
+| Step | When |
+|------|------|
+| `python -m venv venv` | Once (in document_processing_rag/) |
+| Activate venv (e.g. `venv\Scripts\activate` on CMD, `source venv/Scripts/activate` on Git Bash) | Every new terminal |
+| `pip install -r requirements.txt` | Once (or after changing requirements) |
+| Copy `.env.example` to `.env`; set `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY` | Once |
+| `jupyter notebook PR_to_PO_Master.ipynb` | Whenever you want to run the notebook |
+
+---
+
+### AWS setup (Bedrock, OpenSearch, optional RDS)
 
 Use this when you want to run the notebook against **Amazon Bedrock** (and optionally **RDS**) instead of Groq and local Postgres.
 
@@ -215,10 +426,13 @@ pip install langchain-aws boto3
 
 | Step              | Local                               | AWS (production)                          |
 |-------------------|-------------------------------------|-------------------------------------------|
-| Env               | `conda activate pr2po`              | Same + `langchain-aws`, `boto3`           |
-| LLM               | `GROQ_API_KEY`                      | `AWS_REGION` + `BEDROCK_MODEL_ID`         |
-| DB                | SQLite (default); view with [DBeaver](https://dbeaver.io/). Optional: PostgreSQL | RDS PostgreSQL (set `DATABASE_URL`)       |
-| Input/Output      | `document_processing_rag/input` and `output` | Same paths (or S3 if you extend the notebook) |
+| **ENV_MODE**      | `local`                             | `aws`                                      |
+| **.env**          | Copy `.env.example` → `.env`; set `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY` | Set `AWS_REGION` (or `AWS_PROFILE`), `BEDROCK_MODEL_ID`, `OPENSEARCH_ENDPOINT` |
+| **LLM**           | Groq                                | Bedrock                                    |
+| **Vector store**  | Qdrant Cloud                        | OpenSearch                                 |
+| **Embeddings**    | sentence-transformers all-MiniLM-L6-v2 | Titan (Bedrock)                         |
+| **DB**            | SQLite (default); [DBeaver](https://dbeaver.io/). Optional: PostgreSQL | RDS PostgreSQL (set `DATABASE_URL`)       |
+| **Input/Output** | `document_processing_rag/input` and `output` | Same (or S3 if extended)              |
 
 ---
 
@@ -258,10 +472,31 @@ End-to-end flow:
                                         │
                                         ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  DATABASE STRUCTURED ENTRY                                                       │
-│  • Persist parsed PR header, line items, attachments metadata                     │
-│  • Persist parsed quote(s), MSA(s) for audit and validation                      │
-│  • Production: Amazon RDS (PostgreSQL)  • Local: SQLite (default); view with DBeaver  │
+│  SAVE PARSED OUTPUTS (Section 5b)                                                │
+│  • Write pr.json, parsed_quotes.json, parsed_msas.json to output/ immediately    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  STRUCTURED DATA STORAGE (Section 6)                                             │
+│  • Single pr table (header columns + attachments_json, line_items_json)          │
+│  • Structured parsed_quote, parsed_msa tables (scalars + line_items/scope JSON) │
+│  • Production: RDS (PostgreSQL)  • Local: SQLite (default); view with DBeaver    │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  RAG & VECTOR STORAGE (Section 7)                                                │
+│  • Chunking: RecursiveCharacterTextSplitter (500 chars, 50 overlap)              │
+│  • Embeddings: Titan (AWS) or sentence-transformers all-MiniLM-L6-v2 (local)     │
+│  • Vector store: OpenSearch (AWS) or Qdrant Cloud (local); index chunks           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  AGENTIC ORCHESTRATOR (Section 8)                                                │
+│  • Tools: query_sql (structured DB), rag_search (vector store)                   │
+│  • Orchestrator answers test questions by combining SQL + RAG; see diagram below  │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
@@ -290,8 +525,45 @@ End-to-end flow:
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Shared data layer (production):** RDS (PR/contract/supplier master data), S3 (raw documents), OpenSearch (vector search for RAG if needed), Bedrock (LLM + Titan embeddings).  
-**Local:** SQLite (default; no server install); use [DBeaver](https://dbeaver.io/) to view data. Optional: local PostgreSQL; Groq or local LLM.
+**Shared data layer (production):** RDS, S3, OpenSearch (vector store), Bedrock (LLM + Titan embeddings).  
+**Local:** SQLite, [Qdrant Cloud](https://cloud.qdrant.io/) (vector store), Groq (LLM), sentence-transformers (embeddings). Use [DBeaver](https://dbeaver.io/) to view the structured DB.
+
+---
+
+### Agentic architecture: Orchestrator and agents
+
+The notebook uses an **orchestrator** that combines **structured** (SQL) and **unstructured** (RAG) data to answer questions before compliance checks run. Diagram:
+
+```mermaid
+flowchart TB
+    subgraph User
+        Q[User question]
+    end
+    subgraph Orchestrator["Orchestrator (Section 8)"]
+        O[orchestrator_answer]
+    end
+    subgraph Tools
+        SQL[query_sql]
+        RAG[rag_search]
+    end
+    subgraph Data
+        DB[(Structured DB\npr, parsed_quote, parsed_msa)]
+        VS[(Vector store\nOpenSearch or Qdrant)]
+    end
+    Q --> O
+    O --> SQL
+    O --> RAG
+    SQL --> DB
+    RAG --> VS
+    SQL --> O
+    RAG --> O
+    O --> A[Answer]
+```
+
+- **Orchestrator:** Receives a question (e.g. “What is the PR number and total value? Which contract applies?”), calls **query_sql** for facts from the structured tables and **rag_search** for relevant chunks from the vector store, then uses the LLM to synthesize an answer.
+- **SQL agent / tool:** Runs read-only SQL on **pr**, **parsed_quote**, **parsed_msa** (Section 6).
+- **RAG agent / tool:** Runs semantic search via **rag_search(query, k=3)** on the vector store (Section 7: OpenSearch or Qdrant).
+- Compliance **Check 1** and **Check 2** (Sections 9–10) run after the orchestrator; they use the same LLM and structured/RAG context as needed.
 
 ---
 
@@ -299,15 +571,24 @@ End-to-end flow:
 
 | Component        | Production (AWS)                    | Local (run & test)                          |
 |-----------------|-------------------------------------|---------------------------------------------|
-| **Orchestration** | LangChain, LangGraph                | LangChain, LangGraph                        |
-| **LLM**          | Amazon Bedrock (e.g. Claude 3.5 Haiku) | Groq (free tier, e.g. llama-3)           |
-| **Embeddings**   | Amazon Titan Embeddings             | sentence-transformers (e.g. all-MiniLM-L6-v2) or PostgresML |
-| **Structured DB**| Amazon RDS (PostgreSQL)             | SQLite (default); view with DBeaver. Optional: PostgreSQL |
-| **Vector DB**    | OpenSearch (pgvector or dedicated)  | PostgresML (pgvector) or in-memory / Chroma |
-| **Document Store** | S3                                | Local folder (e.g. `synthetic_data/`)      |
-| **Optional**     | Step Functions, Lambda (see ENGINEERING_AWS.md) | Not required for notebook |
+| **ENV_MODE**    | `aws`                               | `local`                                      |
+| **LLM**         | Amazon Bedrock (e.g. Claude 3.5 Haiku) | Groq (free tier, e.g. llama-3)           |
+| **Embeddings**  | Amazon Titan Embeddings (1536 dim)  | **sentence-transformers** **all-MiniLM-L6-v2** (384 dim) |
+| **Chunking**    | RecursiveCharacterTextSplitter (500 chars, 50 overlap) | Same (LangChain) |
+| **Structured DB** | Amazon RDS (PostgreSQL)           | SQLite (default); view with DBeaver. Optional: PostgreSQL |
+| **Vector DB**   | **AWS OpenSearch** (k-NN index)     | **Qdrant Cloud** (collection)               |
+| **Orchestrator**| SQL tool + RAG tool → LLM synthesis | Same                                         |
+| **Document Store** | S3                               | Local folder (e.g. `synthetic_data/` or `input/`) |
+| **Optional**    | Step Functions, Lambda (see ENGINEERING_AWS.md) | Not required for notebook |
 
-The **master notebook** detects which environment is available (AWS env vars vs `GROQ_API_KEY`, etc.) and selects the appropriate LLM and embedding backend so the same code path runs in both modes.
+The **master notebook** uses **ENV_MODE** (or auto-detect from env vars) and **validates required variables** in Section 0: for **local** you must set **GROQ_API_KEY**, **QDRANT_URL**, **QDRANT_API_KEY**; for **aws** you must set **AWS_REGION** (or **AWS_PROFILE**), **BEDROCK_MODEL_ID**, **OPENSEARCH_ENDPOINT**.
+
+### Local RAG: chunking and embedding model
+
+For **ENV_MODE=local**, RAG uses:
+
+- **Chunking:** LangChain **RecursiveCharacterTextSplitter** — **500 characters** per chunk, **50 character** overlap. Applied to uploaded file text and parsed PR/quote/MSA summaries.
+- **Embedding model:** **sentence-transformers** **all-MiniLM-L6-v2** — 384-dimensional vectors, cosine similarity in Qdrant. No API key; runs locally after `pip install sentence-transformers`.
 
 ---
 
@@ -321,7 +602,7 @@ The **master notebook** detects which environment is available (AWS env vars vs 
   **Recommendation:** Start with the notebook; add an MCP server later if you need multi-client or agentic tool use.
 
 - **Vector store / RAG**  
-  For “load reference data” (e.g. policy, category cards, contract summaries), you need a vector store. Production: OpenSearch or RDS + pgvector. Local: PostgresML (pgvector) or Chroma/FAISS. The first two checks do not require RAG; later checks (e.g. policy lookup, semantic layer) can consume embeddings + retrieval.
+  **Implemented:** Production uses **AWS OpenSearch**; local uses **Qdrant Cloud**. Chunks (500 chars, 50 overlap) are embedded with Titan (AWS) or sentence-transformers **all-MiniLM-L6-v2** (local) and indexed. The **orchestrator** (Section 8) uses **rag_search** plus **query_sql** to answer questions before Check 1 and Check 2.
 
 - **Threshold / policy config**  
   Check 1 is policy-driven (e.g. value bands for “1 quote” vs “3 quotes”). Store threshold config in RDS or a JSON/YAML file and pass it into the check.
@@ -442,50 +723,64 @@ Set check_2_status: PASS if all date/timing rules pass; FAIL if expired or wrong
 
 ## Environment Variables
 
-### Production (AWS)
+Use **`document_processing_rag/.env.example`** as the template: copy to **`.env`** and set values for your chosen mode. **Section 0** validates required vars and fails with a clear error if any are missing.
+
+### Mode selection
 
 | Variable | Purpose |
 |----------|--------|
-| `AWS_REGION` | Bedrock, RDS region |
-| `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` (or profile) | Bedrock, S3, RDS access |
+| `ENV_MODE` | `aws` or `local`. If unset, auto-detected from which block of vars is present. |
+
+### Required when ENV_MODE=aws
+
+| Variable | Purpose |
+|----------|--------|
+| `AWS_REGION` or `AWS_PROFILE` | Bedrock and OpenSearch region / profile |
 | `BEDROCK_MODEL_ID` | e.g. `anthropic.claude-3-5-haiku-20241022-v2:0` |
-| `RDS_HOST`, `RDS_PORT`, `RDS_DATABASE`, `RDS_USER`, `RDS_PASSWORD` | PostgreSQL connection |
-| `OPENSEARCH_ENDPOINT` (optional) | Vector search for RAG |
-| `S3_BUCKET`, `S3_PREFIX` (optional) | Document store |
+| `OPENSEARCH_ENDPOINT` or `OPENSEARCH_HOST` | OpenSearch URL for vector store |
 
-### Local
+Optional: `OPENSEARCH_INDEX_NAME`, `OPENSEARCH_USER`, `OPENSEARCH_PASSWORD`, `DATABASE_URL` (RDS), `S3_BUCKET`, `S3_PREFIX`.
+
+### Required when ENV_MODE=local
 
 | Variable | Purpose |
 |----------|--------|
-| `GROQ_API_KEY` | Groq API (free tier LLM) |
-| `LOCAL_LLM_MODEL` | e.g. `llama-3-8b-8192` (Groq) |
-| `LOCAL_EMBEDDING_MODEL` | e.g. `all-MiniLM-L6-v2` (sentence-transformers) |
-| `DATABASE_URL` or `LOCAL_DB_PATH` | Optional. Omit for default SQLite (`pr_validation.db`); use DBeaver to open. Or PostgreSQL URL. |
+| `GROQ_API_KEY` | Groq API key (free tier LLM); from [Groq Console](https://console.groq.com/) |
+| `QDRANT_URL` | Qdrant Cloud cluster URL (e.g. `https://xxx.us-east-1-1.aws.cloud.qdrant.io`) |
+| `QDRANT_API_KEY` | Qdrant Cloud API key; from [Qdrant Cloud](https://cloud.qdrant.io/) (create cluster → API key) |
 
-**Detection logic in notebook:** If `GROQ_API_KEY` is set and AWS Bedrock env is not configured, use Groq + local embeddings. If AWS credentials and `BEDROCK_MODEL_ID` are set, use Bedrock + Titan (or Bedrock embeddings).
+Optional: `QDRANT_COLLECTION_NAME=pr2po`, `LOCAL_LLM_MODEL`, `DATABASE_URL` or `LOCAL_DB_PATH` (default SQLite).
+
+### Optional (both modes)
+
+| Variable | Purpose |
+|----------|--------|
+| `DATABASE_URL` | PostgreSQL URL. Omit for default SQLite (`pr_validation.db`); view with [DBeaver](https://dbeaver.io/). |
 
 ---
 
 ## Repository Structure
 
 ```
-PR to PO Agent/
-├── README.md                          ← This file
+PRtoPOAgent/
+├── README.md                              ← This file
 ├── document_processing_rag/
-│   ├── DEVELOPMENT_TIMELINE.md        ← Product/timeline
-│   ├── ENGINEERING_AWS.md             ← AWS build guide (ECS, Step Functions, RDS, etc.)
-│   ├── PR_to_PO_Test.ipynb            ← Demo notebook (upload → classify; uses pr.json)
-│   ├── PR_to_PO_Master.ipynb          ← Full pipeline (upload → classify → parse → DB → Check 1 & 2); uses pr.json, Check 2 dates-only
-│   └── schemas/
-│       ├── pr.json
-│       ├── quote.json
-│       ├── msa.json
-│       └── compliance_checks/
-│           ├── check_01_attachment_existence_classification/
-│           │   └── check_01_result.json
-│           ├── check_02_document_validity_applicability/
-│           │   └── check_02_result.json
-│           └── (check_03 … check_12 to be added)
+│   ├── .env.example                      ← Env template (copy to .env); ENV_MODE, AWS vs local vars
+│   ├── PR_to_PO_Master.ipynb             ← Full pipeline: §0–12 (env → parse → save → structured DB → RAG → orchestrator → Check 1 & 2)
+│   ├── PR_to_PO_Test.ipynb               ← Demo (upload → classify)
+│   ├── requirements.txt                  ← qdrant-client, opensearch-py, sentence-transformers, langchain, etc.
+│   ├── schemas/
+│   │   ├── pr.json
+│   │   ├── quote.json
+│   │   ├── msa.json
+│   │   └── compliance_checks/
+│   │       ├── check_01_attachment_existence_classification/
+│   │       │   └── check_01_result.json
+│   │       ├── check_02_document_validity_applicability/
+│   │       │   └── check_02_result.json
+│   │       └── (check_03 … check_12 to be added)
+│   ├── DEVELOPMENT_TIMELINE.md
+│   └── ENGINEERING_AWS.md
 └── synthetic_data/
     ├── compliance_check_writeups/
     │   └── PR_Compliance_Check1_Check2_Fields.md
