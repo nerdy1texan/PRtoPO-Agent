@@ -2,6 +2,11 @@
 # Aligned with company-approved package set (S2P Backend / RAG). Groq is our own.
 # Python 3.10.x. Use a dedicated conda env (e.g. pr2po), not base, to avoid conflicts.
 
+# --- Jupyter (run .ipynb notebooks) ---
+jupyter>=1.0.0
+notebook>=7.0.0
+ipykernel>=6.0.0
+
 # --- Company-approved versions (from S2P Backend / RAG list) ---
 
 # Data validation
@@ -19,8 +24,9 @@ langchain==1.1.2
 langchain-text-splitters
 langchain-community==0.4.1
 
-# LLM — local (our own; not in company list)
+# LLM — local (Groq or Gemini; install at least one)
 langchain-groq>=0.1.0
+langchain-google-genai>=2.0.0
 
 # LLM — production (AWS)
 boto3==1.42.4
@@ -47,8 +53,10 @@ numpy>=1.24.0
 # Schema validation (parsing / compliance checks)
 jsonschema>=4.0.0
 
-# Optional: LangGraph (extract graph in master notebook). Omit if not approved.
+# LangGraph (production pipeline + agent with tools; required)
 langgraph>=0.2.0
+# For pipeline/agent diagram rendering (Mermaid PNG)
+grandalf>=0.1
 
 # RAG / vector (Section 7–8). Required per mode.
 # AWS mode: opensearch-py for OpenSearch; Titan via langchain-aws (already above).
