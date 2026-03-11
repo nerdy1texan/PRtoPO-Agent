@@ -1,0 +1,106 @@
+{
+  "header": {
+    "pr_number": "PR-2026-007842",
+    "pr_status": "Submitted",
+    "pr_created_date": "2026-01-15",
+    "total_estimated_value": 71250,
+    "currency": "USD",
+    "requestor_name": "Chen, David",
+    "ship_to_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+    "need_by_date": "2026-02-28",
+    "department": "Engineering \u2014 Platform Infrastructure",
+    "cost_center": "CC-4120-ENG",
+    "company_code": "1000",
+    "company_name": "Meridian Technologies Inc.",
+    "pr_comments": "Standard comment: Quotation attached. Contract MSA-CDW-2024-0156 valid through 12/31/2026. CNP added per policy (total >$50K). Category card IT-HW-001 applied. 3 competitive quotes obtained per policy."
+  },
+  "attachments": {
+    "attachment_count": 4,
+    "attachments": [
+      {
+        "attachment_number": 1,
+        "file_name": "",
+        "file_type": "Other",
+        "document_classification": "Other",
+        "uploaded_by": "",
+        "upload_date": "",
+        "file_size_kb": 0,
+        "description": ""
+      },
+      {
+        "attachment_number": 2,
+        "file_name": "",
+        "file_type": "Other",
+        "document_classification": "Other",
+        "uploaded_by": "",
+        "upload_date": "",
+        "file_size_kb": 0,
+        "description": ""
+      },
+      {
+        "attachment_number": 3,
+        "file_name": "",
+        "file_type": "Other",
+        "document_classification": "Other",
+        "uploaded_by": "",
+        "upload_date": "",
+        "file_size_kb": 0,
+        "description": ""
+      },
+      {
+        "attachment_number": 4,
+        "file_name": "",
+        "file_type": "Other",
+        "document_classification": "Other",
+        "uploaded_by": "",
+        "upload_date": "",
+        "file_size_kb": 0,
+        "description": ""
+      }
+    ]
+  },
+  "line_items": [
+    {
+      "line_number": 10,
+      "item_short_description": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
+      "item_long_description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX, 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS, Windows 11 Pro, 3-Year Premier Onsite.",
+      "material_number": "MAT-IT-00472",
+      "commodity_code": "43211500",
+      "category_l1": "IT",
+      "category_l2": "IT Hardware",
+      "category_l3": "End User Computing",
+      "category_l4": "Laptops & Workstations",
+      "quantity": 25,
+      "unit_of_measure": "Each",
+      "unit_price_usd": 2650,
+      "extended_amount_usd": 66250,
+      "suggested_supplier_id": "V-10042",
+      "suggested_supplier_name": "CDW Corporation",
+      "need_by_date_line": "2026-02-28",
+      "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "asset_tag_required": true,
+      "notes": "Config per Engineering standard build."
+    },
+    {
+      "line_number": 20,
+      "item_short_description": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
+      "item_long_description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD.",
+      "material_number": "MAT-IT-00519",
+      "commodity_code": "43211500",
+      "category_l1": "IT",
+      "category_l2": "IT Hardware",
+      "category_l3": "End User Computing",
+      "category_l4": "Docks & Adapters",
+      "quantity": 1,
+      "unit_of_measure": "Each",
+      "unit_price_usd": 0,
+      "extended_amount_usd": 0,
+      "suggested_supplier_id": "V-10042",
+      "suggested_supplier_name": "CDW Corporation",
+      "need_by_date_line": "2026-02-28",
+      "delivery_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "asset_tag_required": false,
+      "notes": ""
+    }
+  ]
+}

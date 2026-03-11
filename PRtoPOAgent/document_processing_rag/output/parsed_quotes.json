@@ -1,0 +1,53 @@
+[
+  {
+    "source_file_name": "02_CDW_Quote_Q25-0847.pdf",
+    "quote_number": "Q25-0847-MTECH",
+    "quote_date": "2026-01-13",
+    "valid_through": "2026-03-15",
+    "payment_terms": "Net 30",
+    "contract_ref": "MSA-CDW-2024-0156",
+    "account_number": "MTECH-28174",
+    "account_executive_name": "Jennifer Walsh",
+    "account_executive_email": "jennifer.walsh@cdw.com",
+    "currency": "USD",
+    "bill_to": {
+      "company": "Meridian Technologies Inc.",
+      "attention": "Accounts Payable",
+      "address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "email": "AP@meridiantech.com"
+    },
+    "ship_to": {
+      "company": "Meridian Technologies Inc.",
+      "attention": "IT Receiving \u2014 Attn: David Chen",
+      "address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+      "email": "david.chen@meridiantech.com"
+    },
+    "line_items": [
+      {
+        "line_number": 1,
+        "supplier_part_number": "7458923",
+        "manufacturer_part_number": "21FA000GUS",
+        "description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
+        "quantity": 25,
+        "unit_of_measure": "Each",
+        "unit_price": 2650.0,
+        "extended_price": 66250.0
+      },
+      {
+        "line_number": 2,
+        "supplier_part_number": "7129456",
+        "manufacturer_part_number": "40B00135US",
+        "description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD",
+        "quantity": 25,
+        "unit_of_measure": "Each",
+        "unit_price": 200.0,
+        "extended_price": 5000.0
+      }
+    ],
+    "subtotal": 71250.0,
+    "shipping_amount": 0.0,
+    "estimated_tax": 4631.25,
+    "total": 75881.25,
+    "supplier_name": "CDW Corporation"
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "source_file_name": "02b_MSA_CDW_2024_0156_Executed.pdf",
+    "agreement_id": "MSA-CDW-2024-0156",
+    "document_type": "Master Service Agreement",
+    "effective_date": "2024-01-01",
+    "end_date": "2026-12-31",
+    "renewal_terms": "Automatic renewal for successive one (1) year periods; 90 days written notice for non-renewal.",
+    "buyer_name": "Meridian Technologies Inc.",
+    "buyer_address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
+    "supplier_name": "CDW Corporation",
+    "supplier_address": "75 Tri-State International, Lincolnshire, IL 60069",
+    "scope_categories": [
+      "IT Hardware: End User Computing (laptops, desktops, workstations, monitors, peripherals, docking stations)",
+      "IT Hardware: Networking Equipment (switches, routers, access points, cables)",
+      "IT Hardware: Data Center Equipment (servers, storage, UPS systems)",
+      "IT Software: Licensing (operating systems, productivity suites, security tools, via CDW as authorized reseller)",
+      "Related Professional Services: installation, configuration, warranty coordination, and asset disposal"
+    ],
+    "scope_entities": [
+      "1000"
+    ],
+    "ordering_po_required": true,
+    "payment_terms_standard": "Net Thirty (30) days from date of valid, undisputed invoice",
+    "invoicing_upon_shipment": true,
+    "invoice_po_reference_required": true,
+    "payment_method": "ACH electronic transfer",
+    "price_protection_days": 90,
+    "msrp_change_notice_days": 30,
+    "maximum_contract_value": 5000000.0,
+    "maximum_contract_value_currency": "USD",
+    "shipping_terms": "FOB Destination",
+    "shipping_included_threshold_amount": 5000.0,
+    "shipping_included_region": "Continental United States",
+    "lead_time_in_stock_days_min": 5,
+    "lead_time_in_stock_days_max": 10,
+    "lead_time_custom_days_min": 20,
+    "lead_time_custom_days_max": 30,
+    "delivery_notification_days": 2,
+    "manufacturer_warranty": "Standard OEM; Supplier coordinates warranty claims at no additional charge",
+    "extended_warranty_available": true,
+    "return_days": 30,
+    "restocking_fee_pct": 15,
+    "non_returnable_types": [
+      "Custom-configured units",
+      "Software licenses"
+    ],
+    "termination_notice_days": 90,
+    "termination_cure_days": 30,
+    "governing_law": "Commonwealth of Massachusetts",
+    "insurance_min_coverage": 5000000,
+    "signatories": [
+      {
+        "party": "Meridian Technologies Inc.",
+        "name": "Karen Williams",
+        "title": "VP Procurement",
+        "signature_date": "2024-01-01"
+      },
+      {
+        "party": "CDW Corporation",
+        "name": "Thomas Reardon",
+        "title": "VP Enterprise Sales",
+        "signature_date": "2023-12-28"
+      }
+    ],
+    "executed_date": "2024-01-01"
+  }
+]
