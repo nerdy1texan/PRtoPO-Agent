@@ -1,0 +1,84 @@
+{
+  "check_id": "check_06",
+  "check_name": "Amount / Price Validation",
+  "check_6_status": "FAIL",
+  "summary_description": "PR unit price $2650 vs Quote unit price $2650 - variance $0 (0%)",
+  "sub_checks": [
+    {
+      "name": "PR line prices match quote prices",
+      "passed": false
+    }
+  ],
+  "field_level_assessment": [
+    {
+      "field_name": "Unit Price (Line 1)",
+      "status": "fail",
+      "confidence": 0.97,
+      "detail": "PR: $2650 vs Quote: $2650 (variance: $0)"
+    },
+    {
+      "field_name": "Unit Price (Line 2)",
+      "status": "fail",
+      "confidence": 0.97,
+      "detail": "PR: $0 vs Quote: $200 (variance: -$200)"
+    },
+    {
+      "field_name": "Extended Amount (Line 1)",
+      "status": "fail",
+      "confidence": 0.97,
+      "detail": "PR: $66250 vs Quote: $66250 (variance: $0)"
+    },
+    {
+      "field_name": "Extended Amount (Line 2)",
+      "status": "fail",
+      "confidence": 0.97,
+      "detail": "PR: $0 vs Quote: $5000 (variance: -$5000)"
+    },
+    {
+      "field_name": "Total Amount",
+      "status": "fail",
+      "confidence": 0.99,
+      "detail": "PR: $66250 vs Quote: $71250 (variance: -$5000)"
+    }
+  ],
+  "evidence": [
+    {
+      "field": "PR Unit Price (Line 1)",
+      "extracted_value": "$2650.00(99%)",
+      "pr_value": "$2650.00",
+      "match": "Match"
+    },
+    {
+      "field": "Quote Unit Price (Line 1)",
+      "extracted_value": "$2650.00(99%)",
+      "pr_value": "Expected: $2650.00",
+      "match": "Match"
+    },
+    {
+      "field": "PR Unit Price (Line 2)",
+      "extracted_value": "$0.00(99%)",
+      "pr_value": "$0.00",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Quote Unit Price (Line 2)",
+      "extracted_value": "$200.00(99%)",
+      "pr_value": "Expected: $200.00",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Variance (Line 1)",
+      "extracted_value": "$0.00",
+      "pr_value": "Variance: $0 (0%)",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Variance (Line 2)",
+      "extracted_value": "-$200.00",
+      "pr_value": "Variance: -$200 (100%)",
+      "match": "Mismatch"
+    }
+  ],
+  "policy_reference": "Price Validation Policy v1.5, Section 4.1",
+  "agent_recommendation": "Recommend updating PR unit price for Line 2 to $200.00 to match quote, increasing total to $71250.00"
+}

@@ -1,0 +1,42 @@
+{
+  "check_id": "check_05",
+  "check_name": "Quantity & Unit of Measure",
+  "check_5_status": "PASS",
+  "summary_description": "Quantity and UOM match",
+  "sub_checks": [
+    {
+      "name": "PR quantity matches quote quantity, UOM equivalent",
+      "passed": true
+    }
+  ],
+  "field_level_assessment": [
+    {
+      "field_name": "Quantity",
+      "status": "pass",
+      "confidence": 0.99,
+      "detail": "25 Each (exact match)"
+    },
+    {
+      "field_name": "Unit of Measure",
+      "status": "pass",
+      "confidence": 0.99,
+      "detail": "Each (normalized from \"Each\")"
+    }
+  ],
+  "evidence": [
+    {
+      "field": "PR Quantity",
+      "extracted_value": "25 Each",
+      "pr_value": "25 Each",
+      "match": "Match"
+    },
+    {
+      "field": "Quote Quantity",
+      "extracted_value": "25 Each",
+      "pr_value": "Normalized: Each",
+      "match": "Match"
+    }
+  ],
+  "policy_reference": "Data Quality Standards v2.0",
+  "agent_recommendation": null
+}

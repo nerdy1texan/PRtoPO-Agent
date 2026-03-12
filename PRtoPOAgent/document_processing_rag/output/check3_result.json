@@ -1,0 +1,57 @@
+{
+  "check_id": "check_03",
+  "check_name": "Supplier Information Validation",
+  "check_3_status": "PASS",
+  "summary_description": "Supplier name match - high confidence",
+  "supplier_found": true,
+  "matched_vendor_id": "V-10042",
+  "match_confidence": 0.94,
+  "supplier_status": "Active",
+  "entity_authorized": true,
+  "insurance_valid": true,
+  "insurance_gaps": [],
+  "certifications_valid": true,
+  "certification_gaps": [],
+  "document_supplier_match": true,
+  "failure_reasons": [],
+  "sub_checks": [
+    {
+      "name": "PR supplier matches document supplier",
+      "passed": true
+    },
+    {
+      "name": "Supplier exists in master database and is active",
+      "passed": true
+    }
+  ],
+  "field_level_assessment": [
+    {
+      "field_name": "Supplier Name",
+      "status": "pass",
+      "confidence": 0.94,
+      "detail": "Exact match: \"CDW Corporation\""
+    }
+  ],
+  "evidence": [
+    {
+      "field": "PR Supplier",
+      "extracted_value": "CDW Corporation(94%)",
+      "pr_value": "CDW Corporation",
+      "match": "Match"
+    },
+    {
+      "field": "Quote Supplier",
+      "extracted_value": "CDW Corporation(94%)",
+      "pr_value": "CDW Corporation",
+      "match": "Match"
+    },
+    {
+      "field": "Master Record",
+      "extracted_value": "CDW Corporation (V-10042)",
+      "pr_value": "Active",
+      "match": "Match"
+    }
+  ],
+  "policy_reference": "Supplier Master Data Policy, Section 2.1",
+  "agent_recommendation": "No action required."
+}

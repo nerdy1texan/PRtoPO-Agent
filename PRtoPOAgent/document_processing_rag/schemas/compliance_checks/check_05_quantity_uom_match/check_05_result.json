@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 5: Quantity & Unit of Measure Match — Result",
+  "description": "Output of Check 5. Verifies PR quantities and UOM match quote; UOM equivalent (EA=EACH=Hrs=Hours). Ref: PR_Compliance_Checks_3_to_6.md §Check 5.",
+  "type": "object",
+  "required": ["check_id", "check_name", "check_5_status"],
+  "properties": {
+    "check_id": { "type": "string", "const": "check_05", "description": "Stable check identifier." },
+    "check_name": { "type": "string", "const": "Quantity & Unit of Measure", "description": "Display name." },
+    "check_5_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "summary_description": { "type": "string", "description": "Short summary for UI." },
+    "sub_checks": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+    },
+    "field_level_assessment": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field_name": { "type": "string" }, "status": { "type": "string", "enum": ["pass", "fail", "review"] }, "confidence": { "type": "number" }, "detail": { "type": "string" } } }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field": { "type": "string" }, "extracted_value": { "type": "string" }, "pr_value": { "type": "string" }, "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] } } }
+    },
+    "policy_reference": { "type": "string" },
+    "agent_recommendation": { "type": "string" }
+  },
+  "example": {
+    "check_id": "check_05",
+    "check_name": "Quantity & Unit of Measure",
+    "check_5_status": "PASS",
+    "summary_description": "Quantity and UOM match",
+    "sub_checks": [
+      { "name": "PR quantity matches quote quantity, UOM equivalent", "passed": true }
+    ],
+    "field_level_assessment": [
+      { "field_name": "Quantity", "status": "pass", "confidence": 0.99, "detail": "200 Hours (exact match)" },
+      { "field_name": "Unit of Measure", "status": "pass", "confidence": 0.99, "detail": "Hours (normalized from \"Hrs\")" }
+    ],
+    "evidence": [
+      { "field": "PR Quantity", "extracted_value": "200 Hours", "pr_value": "200 Hours", "match": "Match" },
+      { "field": "Quote Quantity", "extracted_value": "200 Hrs(99%)", "pr_value": "Normalized: Hours", "match": "Match" }
+    ],
+    "policy_reference": "Data Quality Standards v2.0",
+    "agent_recommendation": null
+  }
+}

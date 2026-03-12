@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 3: Supplier Existence & Status — Result",
+  "description": "Output of Check 3. Verifies PR supplier is known, active, and authorized; document supplier matches PR supplier. Ref: PR_Compliance_Checks_3_to_6.md §Check 3.",
+  "type": "object",
+  "required": ["check_id", "check_name", "check_3_status"],
+  "properties": {
+    "check_id": { "type": "string", "const": "check_03", "description": "Stable check identifier." },
+    "check_name": { "type": "string", "const": "Supplier Information Validation", "description": "Display name." },
+    "check_3_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "summary_description": { "type": "string", "description": "Short summary for UI." },
+    "supplier_found": { "type": "boolean", "description": "Whether supplier was matched in Supplier Master." },
+    "matched_vendor_id": { "type": "string", "description": "Vendor ID of matched supplier (null if not found)." },
+    "match_confidence": { "type": "number", "minimum": 0, "maximum": 1, "description": "Fuzzy match confidence." },
+    "supplier_status": { "type": "string", "description": "Status of matched supplier (Active, Blocked, etc.)." },
+    "entity_authorized": { "type": "boolean", "description": "Whether supplier is approved for PR entity." },
+    "insurance_valid": { "type": "boolean", "description": "Whether required insurance is current." },
+    "insurance_gaps": { "type": "array", "items": { "type": "string" }, "description": "Missing or expired insurance types." },
+    "certifications_valid": { "type": "boolean", "description": "Whether required certifications are current." },
+    "certification_gaps": { "type": "array", "items": { "type": "string" }, "description": "Missing or expired certifications." },
+    "document_supplier_match": { "type": "boolean", "description": "Whether attachment supplier matches PR supplier." },
+    "failure_reasons": { "type": "array", "items": { "type": "string" }, "description": "Specific failures for remediation." },
+    "sub_checks": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } },
+      "description": "For UI: PR supplier matches document supplier; Supplier exists and is active."
+    },
+    "field_level_assessment": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field_name": { "type": "string" }, "status": { "type": "string", "enum": ["pass", "fail", "review"] }, "confidence": { "type": "number" }, "detail": { "type": "string" } } }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field": { "type": "string" }, "extracted_value": { "type": "string" }, "pr_value": { "type": "string" }, "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] } } }
+    },
+    "policy_reference": { "type": "string", "description": "e.g. Supplier Master Data Policy, Section 2.1" },
+    "agent_recommendation": { "type": "string", "description": "Recommendation when FAIL or NEEDS_REVIEW." }
+  },
+  "example": {
+    "check_id": "check_03",
+    "check_name": "Supplier Information Validation",
+    "check_3_status": "NEEDS_REVIEW",
+    "summary_description": "Supplier name fuzzy match - manual verification recommended",
+    "supplier_found": true,
+    "matched_vendor_id": "V-10892",
+    "match_confidence": 0.78,
+    "supplier_status": "Active",
+    "entity_authorized": true,
+    "insurance_valid": true,
+    "insurance_gaps": [],
+    "certifications_valid": true,
+    "certification_gaps": [],
+    "document_supplier_match": true,
+    "failure_reasons": [],
+    "sub_checks": [
+      { "name": "PR supplier matches document supplier", "passed": false },
+      { "name": "Supplier exists in master database and is active", "passed": true }
+    ],
+    "field_level_assessment": [
+      { "field_name": "Supplier Name", "status": "review", "confidence": 0.78, "detail": "Fuzzy match: \"ACME Corp\" vs \"Acme Consulting LLC\"" }
+    ],
+    "evidence": [
+      { "field": "PR Supplier", "extracted_value": "Acme Consulting LLC(78%)", "pr_value": "ACME Corp", "match": "Match" },
+      { "field": "Quote Supplier", "extracted_value": "Acme Consulting LLC(94%)", "pr_value": "Match with quote", "match": "Partial" },
+      { "field": "Master Record", "extracted_value": "ACME Consulting LLC (V-10892)", "pr_value": "Status: Active", "match": "Match" }
+    ],
+    "policy_reference": "Supplier Master Data Policy, Section 2.1",
+    "agent_recommendation": "Verify supplier name match (ACME Corp vs Acme Consulting LLC) before issuing PO."
+  }
+}

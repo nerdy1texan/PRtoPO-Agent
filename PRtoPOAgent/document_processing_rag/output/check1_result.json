@@ -13,7 +13,7 @@
     {
       "filename": "02_CDW_Quote_Q25-0847.pdf",
       "document_type": "Quotation",
-      "confidence": 0.95,
+      "confidence": 0.98,
       "reason": "Quote number, account number, quote date, line items with prices, valid through date."
     },
     {
@@ -51,7 +51,7 @@
     {
       "field_name": "Quote Document Type",
       "status": "pass",
-      "confidence": 0.95,
+      "confidence": 0.98,
       "detail": "02_CDW_Quote_Q25-0847.pdf classified as Quotation"
     },
     {
@@ -70,7 +70,7 @@
     },
     {
       "field": "Document Types",
-      "extracted_value": "PR Form (99%), Quotation (95%), Contract (99%)",
+      "extracted_value": "PR Form (99%), Quotation (98%), Contract (99%)",
       "pr_value": "Expected: Quotation or Contract",
       "match": "Match"
     }

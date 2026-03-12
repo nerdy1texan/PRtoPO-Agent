@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 4: Item Description Match — Result",
+  "description": "Output of Check 4. Verifies PR line descriptions semantically match quote/contract lines; line count alignment; scope coverage for services. Ref: PR_Compliance_Checks_3_to_6.md §Check 4.",
+  "type": "object",
+  "required": ["check_id", "check_name", "check_4_status"],
+  "properties": {
+    "check_id": { "type": "string", "const": "check_04", "description": "Stable check identifier." },
+    "check_name": { "type": "string", "const": "Item Description Accuracy", "description": "Display name." },
+    "check_4_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "summary_description": { "type": "string", "description": "Short summary for UI." },
+    "sub_checks": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+    },
+    "field_level_assessment": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field_name": { "type": "string" }, "status": { "type": "string", "enum": ["pass", "fail", "review"] }, "confidence": { "type": "number" }, "detail": { "type": "string" } } }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field": { "type": "string" }, "extracted_value": { "type": "string" }, "pr_value": { "type": "string" }, "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] } } }
+    },
+    "policy_reference": { "type": "string" },
+    "agent_recommendation": { "type": "string" }
+  },
+  "example": {
+    "check_id": "check_04",
+    "check_name": "Item Description Accuracy",
+    "check_4_status": "PASS",
+    "summary_description": "PR description matches quote line items",
+    "sub_checks": [
+      { "name": "PR description semantically matches quote items", "passed": true }
+    ],
+    "field_level_assessment": [
+      { "field_name": "Line Item Description", "status": "pass", "confidence": 0.92, "detail": "Semantic match between PR and quote descriptions" }
+    ],
+    "evidence": [
+      { "field": "PR Description", "extracted_value": "Digital marketing strategy consulting", "pr_value": "Digital marketing strategy consulting", "match": "Match" },
+      { "field": "Quote Line 1", "extracted_value": "Marketing strategy & digital campaign planning(92%)", "pr_value": "Semantic match: 92%", "match": "Match" }
+    ],
+    "policy_reference": "Data Quality Standards v2.0",
+    "agent_recommendation": null
+  }
+}

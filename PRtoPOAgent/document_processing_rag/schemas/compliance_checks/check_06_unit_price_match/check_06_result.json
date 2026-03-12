@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 6: Unit Price Match — Result",
+  "description": "Output of Check 6. Verifies PR unit prices match quote/contract; tolerance +/- 1% or $1; no markup vs quote. Ref: PR_Compliance_Checks_3_to_6.md §Check 6.",
+  "type": "object",
+  "required": ["check_id", "check_name", "check_6_status"],
+  "properties": {
+    "check_id": { "type": "string", "const": "check_06", "description": "Stable check identifier." },
+    "check_name": { "type": "string", "const": "Amount / Price Validation", "description": "Display name." },
+    "check_6_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "summary_description": { "type": "string", "description": "Short summary for UI (e.g. variance)." },
+    "sub_checks": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+    },
+    "field_level_assessment": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field_name": { "type": "string" }, "status": { "type": "string", "enum": ["pass", "fail", "review"] }, "confidence": { "type": "number" }, "detail": { "type": "string" } } }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "field": { "type": "string" }, "extracted_value": { "type": "string" }, "pr_value": { "type": "string" }, "match": { "type": "string", "enum": ["Match", "Partial", "Mismatch"] } } }
+    },
+    "policy_reference": { "type": "string" },
+    "agent_recommendation": { "type": "string" }
+  },
+  "example": {
+    "check_id": "check_06",
+    "check_name": "Amount / Price Validation",
+    "check_6_status": "FAIL",
+    "summary_description": "PR unit price $225 vs Quote unit price $250 - variance +$25 (+11.1%)",
+    "sub_checks": [
+      { "name": "PR line prices match quote prices", "passed": false }
+    ],
+    "field_level_assessment": [
+      { "field_name": "Unit Price (Line 1)", "status": "fail", "confidence": 0.97, "detail": "PR: $225 vs Quote: $250 (variance: +$25)" },
+      { "field_name": "Total Amount", "status": "fail", "confidence": 0.99, "detail": "PR: $45,000 vs Quote: $50,000 (variance: +$5,000)" }
+    ],
+    "evidence": [
+      { "field": "PR Unit Price", "extracted_value": "$225.00(99%)", "pr_value": "$225.00", "match": "Mismatch" },
+      { "field": "Quote Unit Price", "extracted_value": "$250.00(98%)", "pr_value": "Expected: $250.00", "match": "Mismatch" },
+      { "field": "Variance", "extracted_value": "+$25.00 per hour", "pr_value": "Variance: +11.1%", "match": "Mismatch" }
+    ],
+    "policy_reference": "Price Validation Policy v1.5, Section 4.1",
+    "agent_recommendation": "Recommend updating PR unit price to $250.00 to match quote, increasing total to $50,000.00"
+  }
+}

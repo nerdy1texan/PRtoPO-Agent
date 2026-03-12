@@ -1,0 +1,48 @@
+{
+  "check_id": "check_04",
+  "check_name": "Item Description Accuracy",
+  "check_4_status": "PASS",
+  "summary_description": "PR description matches quote line items",
+  "sub_checks": [
+    {
+      "name": "PR description semantically matches quote items",
+      "passed": true
+    }
+  ],
+  "field_level_assessment": [
+    {
+      "field_name": "Line Item Description",
+      "status": "pass",
+      "confidence": 0.92,
+      "detail": "Semantic match between PR and quote descriptions"
+    }
+  ],
+  "evidence": [
+    {
+      "field": "PR Description",
+      "extracted_value": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
+      "pr_value": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX, 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS, Windows 11 Pro, 3-Year Premier Onsite.",
+      "match": "Match"
+    },
+    {
+      "field": "Quote Line 1",
+      "extracted_value": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
+      "pr_value": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
+      "match": "Match"
+    },
+    {
+      "field": "PR Description",
+      "extracted_value": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
+      "pr_value": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD.",
+      "match": "Match"
+    },
+    {
+      "field": "Quote Line 2",
+      "extracted_value": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD",
+      "pr_value": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
+      "match": "Match"
+    }
+  ],
+  "policy_reference": "Data Quality Standards v2.0",
+  "agent_recommendation": null
+}
