@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 5: Quantity & UOM Match — Input Reference",
+  "description": "Data sources and fields required for Check 5 (doc §5.6). Used to build context for LLM and deterministic fallback.",
+
+  "from_pr_line_items": {
+    "source": "PR Line Items (System Data)",
+    "fields": [
+      { "field": "pr_line_items[].quantity", "data_type": "decimal", "used_in_rule": "5.1–5.6 All quantity validation rules" },
+      { "field": "pr_line_items[].unit_of_measure", "data_type": "string", "notes": "uom", "used_in_rule": "5.3, 5.7 UOM equivalence and alignment" }
+    ]
+  },
+
+  "from_pr_header": {
+    "source": "PR Header (System Data)",
+    "fields": [
+      { "field": "pr_category_l1", "data_type": "string", "used_in_rule": "Determine category-specific MOQ/increment rules (§5.5)" }
+    ]
+  },
+
+  "from_quote": {
+    "source": "Quote (Extracted)",
+    "fields": [
+      { "field": "quote.line_items[].quantity", "data_type": "decimal", "used_in_rule": "5.1, 5.2 Quantity comparison baseline" },
+      { "field": "quote.line_items[].unit_of_measure", "data_type": "string", "notes": "uom", "used_in_rule": "5.3, 5.7 UOM comparison" }
+    ]
+  },
+
+  "from_contract": {
+    "source": "Contract (Reference Data)",
+    "fields": [
+      { "field": "contract.minimum_order_qty", "data_type": "decimal", "used_in_rule": "5.4 MOQ check (contract level)" },
+      { "field": "contract.maximum_order_qty", "data_type": "decimal", "used_in_rule": "5.5 Max qty check (contract level)" },
+      { "field": "contract.order_increment", "data_type": "decimal", "used_in_rule": "5.6 Valid increment check" },
+      { "field": "contract.units_per_case", "data_type": "decimal", "used_in_rule": "5.3 UOM conversion (CS vs EA)" }
+    ]
+  },
+
+  "from_item_master": {
+    "source": "Item Master (Reference Data)",
+    "fields": [
+      { "field": "item.default_uom", "data_type": "string", "used_in_rule": "5.3 Standard UOM for item" }
+    ]
+  }
+}

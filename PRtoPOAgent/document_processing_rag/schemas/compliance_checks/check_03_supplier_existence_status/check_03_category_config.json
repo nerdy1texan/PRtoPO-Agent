@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 3 — Category Config: Insurance & Certification Requirements",
+  "description": "Reference data for Check 3 rules 3.2.4 (insurance) and 3.2.5 (certifications). Maps PR category_l1 (or category_l2) to required insurance types and certifications. Source: doc §3.3 and §3.4.",
+
+  "insurance_requirements_by_category": {
+    "MRO / Facilities": {
+      "required_insurance": ["General Liability", "Workers Compensation"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "Standard coverage for facility maintenance and repair vendors."
+    },
+    "Construction": {
+      "required_insurance": ["General Liability", "Workers Compensation", "Professional Liability (Errors & Omissions)"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "High-risk projects may require higher limits; bonding may also apply."
+    },
+    "Professional Services": {
+      "required_insurance": ["Professional Liability (Errors & Omissions)"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "Advisory, tax, professional consulting services."
+    },
+    "IT Services": {
+      "required_insurance": ["Professional Liability (Errors & Omissions)", "Cyber Liability"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "Cloud, managed services, SaaS; cyber liability required for data-handling vendors."
+    },
+    "IT": {
+      "required_insurance": ["Professional Liability (Errors & Omissions)", "Cyber Liability"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "Alias for IT Services when category_l1 is IT."
+    },
+    "Logistics / Transportation": {
+      "required_insurance": ["General Liability", "Auto Liability", "Cargo Insurance"],
+      "typical_minimums": "$1M+",
+      "notes": "Freight, shipping, warehousing vendors."
+    },
+    "Healthcare / Medical": {
+      "required_insurance": ["General Liability", "Professional Liability (Malpractice)", "Workers Compensation"],
+      "typical_minimums": "$1M – $5M",
+      "notes": "Clinical, medical device, pharmaceutical vendors."
+    },
+    "Staffing / Contingent Labor": {
+      "required_insurance": ["Workers Compensation", "General Liability"],
+      "typical_minimums": "$1M+",
+      "notes": "Temporary staffing, contingent workforce providers."
+    },
+    "IT Hardware": {
+      "required_insurance": [],
+      "typical_minimums": null,
+      "notes": "Not typically required for hardware-only purchases."
+    },
+    "Food Services": {
+      "required_insurance": ["General Liability", "Product Liability"],
+      "typical_minimums": "$1M – $2M",
+      "notes": "Catering, cafeteria, food supply vendors."
+    }
+  },
+
+  "certification_requirements_by_category": {
+    "Healthcare / Biomedical": {
+      "required_certifications": ["ISO 13485", "FDA Registration"],
+      "compliance_rationale": "Quality systems, medical device manufacturing, FDA-regulated products."
+    },
+    "Healthcare / Medical": {
+      "required_certifications": ["ISO 13485", "FDA Registration"],
+      "compliance_rationale": "Quality systems for medical devices and clinical supplies."
+    },
+    "Construction": {
+      "required_certifications": ["OSHA Certifications", "Bonding/Surety"],
+      "compliance_rationale": "Safety, licensing, construction bonding requirements."
+    },
+    "IT Services": {
+      "required_certifications": ["SOC 2 Type II", "ISO 27001"],
+      "compliance_rationale": "Information security, data privacy, cloud service providers."
+    },
+    "IT": {
+      "required_certifications": ["SOC 2 Type II", "ISO 27001"],
+      "compliance_rationale": "Alias for IT Services when category_l1 is IT."
+    },
+    "Manufacturing / Engineering": {
+      "required_certifications": ["ISO 9001", "AS9100"],
+      "compliance_rationale": "Quality management systems, aerospace/defense manufacturing."
+    },
+    "Food Services": {
+      "required_certifications": ["ServSafe", "HACCP"],
+      "compliance_rationale": "Food safety, hygiene, regulatory compliance."
+    },
+    "Professional Services": {
+      "required_certifications": [],
+      "compliance_rationale": "Generally no specific certifications required; may vary by engagement."
+    },
+    "IT Hardware": {
+      "required_certifications": [],
+      "compliance_rationale": "Not typically required for hardware resellers."
+    },
+    "MRO / Facilities": {
+      "required_certifications": [],
+      "compliance_rationale": "Not typically required; may need trade licenses depending on scope."
+    },
+    "Logistics / Transportation": {
+      "required_certifications": ["DOT Certification", "C-TPAT"],
+      "compliance_rationale": "Department of Transportation, customs-trade partnership."
+    },
+    "Staffing / Contingent Labor": {
+      "required_certifications": [],
+      "compliance_rationale": "Not typically required; staffing agencies may need state licenses."
+    }
+  },
+
+  "category_lookup_notes": "Match PR category_l1 or category_l2 against keys above (case-insensitive, substring OK). If no match, treat insurance and certifications as not required for that category."
+}

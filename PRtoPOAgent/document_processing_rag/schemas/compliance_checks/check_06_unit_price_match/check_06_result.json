@@ -1,17 +1,25 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Check 6: Unit Price Match — Result",
-  "description": "Output of Check 6. Verifies PR unit prices match quote/contract; tolerance +/- 1% or $1; no markup vs quote. Ref: PR_Compliance_Checks_3_to_6.md §Check 6.",
+  "description": "Output of Check 6. Verifies PR unit prices match quote/contract/rate card; tolerance +/- 1% or $1; no markup; contract ceiling; discount and currency when applicable. Ref: doc §Check 6.",
   "type": "object",
   "required": ["check_id", "check_name", "check_6_status"],
   "properties": {
     "check_id": { "type": "string", "const": "check_06", "description": "Stable check identifier." },
-    "check_name": { "type": "string", "const": "Amount / Price Validation", "description": "Display name." },
-    "check_6_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
-    "summary_description": { "type": "string", "description": "Short summary for UI (e.g. variance)." },
+    "check_name": { "type": "string", "const": "Unit Price Match", "description": "Display name (doc §Check 6)." },
+    "check_6_status": { "type": "string", "enum": ["PASS", "FAIL", "WARNING", "NEEDS_REVIEW"], "description": "Overall result. WARNING = discount not applied (6.4) or currency mismatch (6.6)." },
+    "summary_description": { "type": "string", "description": "Short summary (e.g. variance %)." },
+    "quote_price_match": { "type": "boolean", "description": "6.1: PR unit price within +/- 1% or $1 of quote." },
+    "contract_ceiling_ok": { "type": "boolean", "description": "6.2: PR price <= contract price when contract exists." },
+    "rate_card_ok": { "type": "boolean", "description": "6.3: T&M rate <= approved rate card when applicable." },
+    "discount_applied": { "type": "boolean", "description": "6.4: Expected discount applied when contract specifies; else N/A." },
+    "no_markup_vs_quote": { "type": "boolean", "description": "6.5: PR price <= Quote price (no internal markup)." },
+    "currency_alignment": { "type": "boolean", "description": "6.6: Same currency or converted with approved rate; WARNING if mismatch." },
+    "failure_reasons": { "type": "array", "items": { "type": "string" }, "description": "Specific failures for remediation." },
     "sub_checks": {
       "type": "array",
-      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } },
+      "description": "6.1 PR–Quote Price Match, 6.2 Contract Ceiling, 6.3 Rate Card, 6.4 Discount Applied, 6.5 No Markup vs Quote, 6.6 Currency Alignment."
     },
     "field_level_assessment": {
       "type": "array",
@@ -26,22 +34,32 @@
   },
   "example": {
     "check_id": "check_06",
-    "check_name": "Amount / Price Validation",
-    "check_6_status": "FAIL",
-    "summary_description": "PR unit price $225 vs Quote unit price $250 - variance +$25 (+11.1%)",
+    "check_name": "Unit Price Match",
+    "check_6_status": "PASS",
+    "summary_description": "PR unit prices match quote within tolerance; no markup.",
+    "quote_price_match": true,
+    "contract_ceiling_ok": true,
+    "rate_card_ok": true,
+    "discount_applied": true,
+    "no_markup_vs_quote": true,
+    "currency_alignment": true,
+    "failure_reasons": [],
     "sub_checks": [
-      { "name": "PR line prices match quote prices", "passed": false }
+      { "name": "6.1 PR–Quote Price Match (+/- 1% or $1)", "passed": true },
+      { "name": "6.2 Contract Price Ceiling", "passed": true },
+      { "name": "6.3 Rate Card Compliance (T&M)", "passed": true },
+      { "name": "6.4 Discount Applied", "passed": true },
+      { "name": "6.5 No Markup vs Quote", "passed": true },
+      { "name": "6.6 Currency Alignment", "passed": true }
     ],
     "field_level_assessment": [
-      { "field_name": "Unit Price (Line 1)", "status": "fail", "confidence": 0.97, "detail": "PR: $225 vs Quote: $250 (variance: +$25)" },
-      { "field_name": "Total Amount", "status": "fail", "confidence": 0.99, "detail": "PR: $45,000 vs Quote: $50,000 (variance: +$5,000)" }
+      { "field_name": "Unit Price Line 1", "status": "pass", "confidence": 1.0, "detail": "PR $2650 vs Quote $2650 (0% variance)" }
     ],
     "evidence": [
-      { "field": "PR Unit Price", "extracted_value": "$225.00(99%)", "pr_value": "$225.00", "match": "Mismatch" },
-      { "field": "Quote Unit Price", "extracted_value": "$250.00(98%)", "pr_value": "Expected: $250.00", "match": "Mismatch" },
-      { "field": "Variance", "extracted_value": "+$25.00 per hour", "pr_value": "Variance: +11.1%", "match": "Mismatch" }
+      { "field": "PR Unit Price", "extracted_value": "2650", "pr_value": "2650", "match": "Match" },
+      { "field": "Quote Unit Price", "extracted_value": "2650", "pr_value": "Match", "match": "Match" }
     ],
-    "policy_reference": "Price Validation Policy v1.5, Section 4.1",
-    "agent_recommendation": "Recommend updating PR unit price to $250.00 to match quote, increasing total to $50,000.00"
+    "policy_reference": "Price Validation Policy v1.5; Check 6 §6.1–6.6",
+    "agent_recommendation": null
   }
 }

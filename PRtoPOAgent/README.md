@@ -9,23 +9,56 @@ This repo contains **schemas**, **compliance check specs**, **synthetic data**, 
 ## Table of Contents
 
 1. [Getting Started](#getting-started)
-2. [Command-line setup (CMD and Git Bash)](#command-line-setup-windows-cmd-and-git-bash)
-3. [Venv environment setup (alternative to conda)](#venv-environment-setup-alternative-to-conda)
-4. [Architecture](#architecture)
-5. [Tech Stacks: Production vs Local](#tech-stacks-production-vs-local)
-6. [What Else Is Needed? (MCP, Vector Store, etc.)](#what-else-is-needed)
-7. [Schemas & Examples](#schemas--examples)
-8. [Compliance Checks](#compliance-checks)
-9. [System Prompts](#system-prompts)
-10. [Environment Variables](#environment-variables)
-11. [Repository Structure](#repository-structure)
-12. [References](#references)
+2. [Install via Conda environment file (reproducible)](#install-via-conda-environment-file-reproducible)
+3. [Command-line setup (CMD and Git Bash)](#command-line-setup-windows-cmd-and-git-bash)
+4. [Venv environment setup (alternative to conda)](#venv-environment-setup-alternative-to-conda)
+5. [Architecture](#architecture)
+6. [Tech Stacks: Production vs Local](#tech-stacks-production-vs-local)
+7. [What Else Is Needed? (MCP, Vector Store, etc.)](#what-else-is-needed)
+8. [Schemas & Examples](#schemas--examples)
+9. [Compliance Checks](#compliance-checks)
+10. [System Prompts](#system-prompts)
+11. [Environment Variables](#environment-variables)
+12. [Repository Structure](#repository-structure)
+13. [References](#references)
 
 ---
 
 ## Getting Started
 
-Choose **ENV_MODE**: **`aws`** (Bedrock + OpenSearch + Titan) or **`local`** (Groq + Qdrant Cloud + sentence-transformers). Copy **`document_processing_rag/.env.example`** to **`.env`** and set the required variables for your mode (Section 0 validates them). Follow **Local setup** for Groq + Qdrant + SQLite; follow **AWS setup** for Bedrock + OpenSearch + optional RDS. Use **[DBeaver](https://dbeaver.io/)** to view the structured database.
+Choose **ENV_MODE**: **`aws`** (Bedrock + OpenSearch + Titan) or **`local`** (Groq/Gemini + Qdrant Cloud + sentence-transformers). Copy **`document_processing_rag/.env.example`** to **`.env`** and set the required variables for your mode (Section 0 validates them). For a **reproducible environment** with a fixed Python version on any machine, use the [Conda environment file](#install-via-conda-environment-file-reproducible). Otherwise follow **Local setup** for conda/venv + API keys + SQLite. Use **[DBeaver](https://dbeaver.io/)** to view the structured database.
+
+---
+
+### Install via Conda environment file (reproducible)
+
+Use this to get the **same Python version and dependencies** on any system (Windows, macOS, Linux) without manually creating an env and installing from `requirements.txt`.
+
+**Prerequisite:** [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or Anaconda installed.
+
+From the repo root (e.g. `PRtoPOAgent/`):
+
+```bash
+# Create the pr2po environment from the yml (Python 3.10 + all pip deps)
+conda env create -f document_processing_rag/environment.yml
+
+# Activate it
+conda activate pr2po
+
+# Go to the notebook folder
+cd document_processing_rag
+
+# Copy env template and set your keys (see .env.example)
+copy .env.example .env   # Windows CMD
+# cp .env.example .env  # Git Bash / macOS / Linux
+
+# Run the notebook
+jupyter notebook PR_to_PO_Master.ipynb
+```
+
+- **Python:** Pinned to **3.10** in `environment.yml` so everyone gets the same interpreter.
+- **Update env later:** After changing `environment.yml`, run `conda env update -f document_processing_rag/environment.yml --prune` with `pr2po` activated.
+- **Export exact pins (optional):** For fully frozen versions, after a working install run `pip freeze > requirements-frozen.txt` and use that list in your own process.
 
 ---
 
@@ -133,8 +166,8 @@ QDRANT_API_KEY=your_qdrant_cloud_api_key
 
 **Quick start checklist (local)**
 
-1. **Environment:** **Conda** — `conda create -n pr2po python=3.10 -y` → `conda activate pr2po`. **Venv (alternative):** See [Venv environment setup](#venv-environment-setup-alternative-to-conda).
-2. `cd PRtoPOAgent/document_processing_rag` → `pip install -r requirements.txt`
+1. **Environment:** **Conda (reproducible):** `conda env create -f document_processing_rag/environment.yml` → `conda activate pr2po`. **Or manual:** `conda create -n pr2po python=3.10 -y` → `conda activate pr2po`. **Venv (alternative):** See [Venv environment setup](#venv-environment-setup-alternative-to-conda).
+2. If you didn’t use the yml: `cd PRtoPOAgent/document_processing_rag` → `pip install -r requirements.txt`
 3. Copy `.env.example` to `.env`; set **ENV_MODE=local**, **GROQ_API_KEY** ([Groq](https://console.groq.com/)), **QDRANT_URL** and **QDRANT_API_KEY** ([Qdrant Cloud](https://cloud.qdrant.io/)).
 4. (Optional) Install [DBeaver](https://dbeaver.io/) to view the database later.
 5. `jupyter notebook PR_to_PO_Master.ipynb` → run all cells in order (Section 0 through 12).
@@ -588,7 +621,7 @@ The **master notebook** uses **ENV_MODE** (or auto-detect from env vars) and **v
 For **ENV_MODE=local**, RAG uses:
 
 - **Chunking:** LangChain **RecursiveCharacterTextSplitter** — **500 characters** per chunk, **50 character** overlap. Applied to uploaded file text and parsed PR/quote/MSA summaries.
-- **Embedding model:** **sentence-transformers** **all-MiniLM-L6-v2** — 384-dimensional vectors, cosine similarity in Qdrant. No API key; runs locally after `pip install sentence-transformers`.
+- **Embedding model:** **sentence-transformers** **all-MiniLM-L6-v2** — 384-dimensional vectors, cosine similarity in Qdrant. No API key; runs locally after `pip install sentence-transformers`. **CPU-only:** If you have no GPU, PyTorch and sentence-transformers automatically use CPU; no code changes needed.
 
 ---
 
@@ -719,6 +752,108 @@ Validate:
 Set check_2_status: PASS if all date/timing rules pass; FAIL if expired or wrong sequence; NEEDS_REVIEW if e.g. expiration within 30 days. Output JSON matching the Check 2 result schema (dates & timings only).
 ```
 
+### Checks 3–6 (schemas, category config, and LLM context)
+
+Checks **3–6** follow the same pattern as Checks 1–2:
+
+- A **result schema** (`check_0X_result.json`) that defines the output JSON and includes an **example**.
+- An **input reference** (`check_0X_input_reference.json`) that documents which fields we pass into the LLM for that check.
+- A **category config** (`check_0X_*_category_config.json`) that tells the check how to behave for different categories (IT Hardware vs MRO vs Services, etc.).
+- A **system prompt** built from the result schema + policy text.
+- A **context JSON** built from the PR/quote/MSA/contract data plus the category config, passed in the user message.
+- A **deterministic fallback** that uses the same inputs and category rules if the LLM JSON is invalid.
+
+In **all cases**, the user message sent to the LLM looks like:
+
+```text
+Context for this compliance check:
+{ ...context_json_built_from_input_reference_and_category_config... }
+
+Produce the check result JSON matching the required structure. Output only valid JSON.
+```
+
+The context JSON keys differ per check (for example `check_3_input`, `check_4_input`, `check_5_input`, `check_6_input`), but the shape and flow are the same.
+
+#### Check 3 — Supplier Existence & Status
+
+- **Input reference**: `check_03_input_reference.json` lists fields like:
+  - PR supplier fields (e.g. `suggested_supplier_name`, `company_code`, category).
+  - Supplier from quote / contract.
+  - Optional Supplier Master fields (status, approved_entities, insurance, certifications).
+- **Category config**: `check_03_category_config.json` encodes, per category (§3.3/§3.4), which **insurance** and **certifications** are required and typical minimums.
+- **Result schema**: `check_03_result.json` defines:
+  - `check_3_status` (PASS / FAIL / WARNING / NEEDS_REVIEW).
+  - Fields like `supplier_found`, `match_confidence`, `supplier_status`, `entity_authorized`.
+  - `insurance_met` / `insurance_gaps` and `certifications_met` / `certification_gaps`.
+  - `document_supplier_match`, `failure_reasons`, `sub_checks` (3.2.1–3.2.6), `field_level_assessment`, `evidence`.
+- **Notebook flow**:
+  - Builds `context_check3` with a `check_3_input` block (PR supplier, company_code, category, document supplier) and a `category_requirements` block (required insurance/certs for the PR’s category), plus raw `pr_header`, `pr_line_items`, `parsed_quotes`, and `parsed_msas`.
+  - `build_check_system_prompt(check3_schema, CHECK_3_POLICY)` → `CHECK_3_SYSTEM`; `run_check_with_llm(llm, 3, context_check3)` runs the LLM path.
+  - Deterministic `run_check_3(...)` uses the same inputs and category config as a fallback when the LLM output can’t be validated.
+
+#### Check 4 — Item Description Match
+
+- **Input reference**: `check_04_input_reference.json` identifies:
+  - PR line items: `line_number`, short/long `description`, `manufacturer`.
+  - Quote line items: `line_number`, `description`, `manufacturer`.
+  - SOW fields for services: `scope_summary`, `in_scope[]`, `out_of_scope[]`.
+  - Contract catalog items: `catalog_items[]` with `sku`, `description`, `manufacturer`.
+- **Category config**: `check_04_category_config.json` captures catalog/SKU applicability (§4.4):
+  - IT Hardware / IT: approved product list, **part + manufacturer** critical.
+  - MRO: storeroom catalog / VMI.
+  - Office Supplies: punch‑out catalog.
+  - Services / Professional Services: rate card / SOW scope.
+- **Result schema**: `check_04_result.json` defines:
+  - `check_4_status` and booleans: `description_semantic_match`, `manufacturer_match`, `line_count_alignment`, `scope_coverage_services`.
+  - `failure_reasons`, `sub_checks` (4.1, 4.3, 4.4, 4.6), `field_level_assessment`, `evidence`.
+- **Notebook flow**:
+  - Builds `check_4_input` with simplified PR/quote line items and any SOW scope, plus `category_catalog_note` from the category config.
+  - LLM compares descriptions, manufacturers, and scope for the given category; fallback `run_check_4(...)` implements a conservative rule‑based version of the same logic.
+
+#### Check 5 — Quantity & Unit of Measure Match
+
+- **Input reference**: `check_05_input_reference.json` specifies:
+  - PR line `quantity` and `unit_of_measure`.
+  - PR category (for category‑specific logic).
+  - Quote line `quantity` and `unit_of_measure`.
+  - Optional contract MOQ / max qty / increment / units_per_case and item‑master default UOM.
+- **Category config**: `check_05_category_config.json` encodes §5.5 rules:
+  - MRO / Office Supplies: CS vs EA warnings.
+  - Services / Professional Services: **time‑based** UOM for T&M (HRS, DAY, WK, MO).
+  - Print / Marketing: valid print increments (e.g. 500, 1000).
+  - Plus a shared `uom_equivalences` map (EA/EACH/PC, CS/CASE, BX/BOX, HRS/HOURS, etc.).
+- **Result schema**: `check_05_result.json` defines:
+  - `check_5_status` and booleans: `quantity_match` (5.1), `partial_order_ok` (5.2), `uom_match` (5.3), `uom_price_alignment` (5.7).
+  - `failure_reasons`, `sub_checks`, `field_level_assessment`, `evidence`.
+- **Notebook flow**:
+  - Builds `check_5_input` with PR/quote quantity + UOM and a `category_specific_note` from the category config.
+  - LLM evaluates 5.1–5.3, 5.7 plus category‑specific rules; fallback `run_check_5(...)`:
+    - Compares quantities (exact match and PR ≤ quote per line).
+    - Uses `_uom_equivalent` + category rules for UOM and print increments.
+    - Sets `check_5_status` to PASS / FAIL / WARNING accordingly.
+
+#### Check 6 — Unit Price Match
+
+- **Input reference**: `check_06_input_reference.json` lists:
+  - PR line `unit_price` and `extended_amount`, PR `currency`, PR category.
+  - Quote `unit_price` and `currency`.
+  - Optional contract price/list/discount.
+  - Optional rate‑card role + approved rate and validity dates.
+- **Category config**: `check_06_category_config.json` maps categories to **pricing models**:
+  - IT Hardware / Office Supplies: **catalog** (discount off list; compare to quote).
+  - MRO / Facilities / Construction: **contract** (unit price ceiling).
+  - Professional Services / IT Services / Staffing / Services: **rate card**.
+  - Direct Materials: **negotiated/index‑based**.
+- **Result schema**: `check_06_result.json` defines:
+  - `check_6_status` and booleans: `quote_price_match`, `contract_ceiling_ok`, `rate_card_ok`, `discount_applied`, `no_markup_vs_quote`, `currency_alignment`.
+  - `failure_reasons`, `sub_checks` (6.1–6.6), `field_level_assessment`, `evidence`.
+- **Notebook flow**:
+  - Builds `check_6_input` with PR/quote prices and currencies plus `category_pricing_note` from the category config.
+  - LLM enforces the 6.1–6.6 rules for the appropriate pricing model; fallback `run_check_6(...)`:
+    - Enforces 6.1 (±1% or $1 tolerance) and 6.5 (no markup) on PR vs quote.
+    - Flags obvious 6.6 currency mismatches.
+    - Fills the structured result JSON defined by the schema.
+
 ---
 
 ## Environment Variables
@@ -768,7 +903,8 @@ PRtoPOAgent/
 │   ├── .env.example                      ← Env template (copy to .env); ENV_MODE, AWS vs local vars
 │   ├── PR_to_PO_Master.ipynb             ← Full pipeline: §0–12 (env → parse → save → structured DB → RAG → orchestrator → Check 1 & 2)
 │   ├── PR_to_PO_Test.ipynb               ← Demo (upload → classify)
-│   ├── requirements.txt                  ← qdrant-client, opensearch-py, sentence-transformers, langchain, etc.
+│   ├── requirements.txt                  ← pip dependencies (used by manual setup)
+│   ├── environment.yml                   ← Conda env: exact Python 3.10 + pip deps (reproducible across systems)
 │   ├── schemas/
 │   │   ├── pr.json
 │   │   ├── quote.json

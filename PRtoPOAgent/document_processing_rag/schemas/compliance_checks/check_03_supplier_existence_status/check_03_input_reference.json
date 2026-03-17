@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 3: Supplier Existence & Status — Input reference (doc §3.5)",
+  "description": "When available, pass supplier_master and category_config into Check 3 context so rules 3.2.4 and 3.2.5 can evaluate insurance and certifications. Omit or use empty arrays when not available.",
+  "type": "object",
+  "properties": {
+    "check_3_input": {
+      "type": "object",
+      "description": "From PR and attachment (always populated by notebook).",
+      "properties": {
+        "pr_requested_vendor": { "type": "string", "description": "PR supplier name (or pr_suggested_supplier)." },
+        "pr_company_code": { "type": "string", "description": "PR company/legal entity code." },
+        "pr_category_id": { "type": "string", "description": "PR category (or category_l1/l2) for insurance/cert lookup." },
+        "document_pr_vendor": { "type": "string", "description": "Supplier name extracted from quote/contract/SOW attachment." }
+      }
+    },
+    "supplier_master": {
+      "type": "object",
+      "description": "FROM SUPPLIER MASTER (reference data). Matched supplier record when available.",
+      "properties": {
+        "vendor_id": { "type": "string" },
+        "vendor_name": { "type": "string" },
+        "vendor_alt_names": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "description": "Active | Blocked | Inactive | Debarred | Pending." },
+        "approved_entities": { "type": "array", "items": { "type": "string" }, "description": "Company codes this supplier is approved for." },
+        "insurance_policies": {
+          "type": "array",
+          "description": "Supplier's insurance policies (for rule 3.2.4).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "policy_type": { "type": "string", "description": "e.g. General Liability, D&O, E&O." },
+              "coverage_amount": { "type": "number" },
+              "expire_date": { "type": "string", "description": "ISO date." },
+              "status": { "type": "string" }
+            }
+          }
+        },
+        "certifications": {
+          "type": "array",
+          "description": "Supplier's certifications (for rule 3.2.5).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cert_type": { "type": "string" },
+              "cert_id": { "type": "string" },
+              "issue_date": { "type": "string" },
+              "expiry_date": { "type": "string" },
+              "issuer": { "type": "string" },
+              "body": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "category_config": {
+      "type": "object",
+      "description": "FROM CATEGORY CONFIG (reference data). Defines what insurance and certifications are required per category (doc §3.3, §3.4).",
+      "properties": {
+        "insurance_requirements_by_category": {
+          "type": "array",
+          "description": "Required insurance types and coverage by category (e.g. MRO, Construction, IT Services).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category_id": { "type": "string" },
+              "category_name": { "type": "string" },
+              "required_insurance_types": { "type": "array", "items": { "type": "string" } },
+              "typical_coverage": { "type": "string" },
+              "rationale": { "type": "string" }
+            }
+          }
+        },
+        "certification_requirements_by_category": {
+          "type": "array",
+          "description": "Required certifications by category (e.g. ISO 9001, SOC 2, FDA).",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category_id": { "type": "string" },
+              "category_name": { "type": "string" },
+              "required_certifications": { "type": "array", "items": { "type": "string" } },
+              "compliance_rationale": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

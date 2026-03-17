@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 5 — Category-Specific Quantity & UOM Validation",
+  "description": "Reference data for Check 5 category-specific rules (doc §5.5). Informs LLM and fallback when to apply EA vs CS warning, time-based UOM, etc.",
+
+  "category_specific_validation": {
+    "MRO / Facilities": {
+      "rule": "If quote UOM is case (CS) but PR UOM is each (EA), WARNING: possible error (ordering 100 EA when quote was 100 CS). Calculate pr_qty vs quote_qty * units_per_case if available.",
+      "uom_emphasis": "CS vs EA conversion",
+      "typical_units_per_case": null
+    },
+    "MRO": {
+      "rule": "Same as MRO/Facilities. CS vs EA mismatch triggers WARNING.",
+      "uom_emphasis": "CS vs EA conversion",
+      "typical_units_per_case": null
+    },
+    "Office Supplies": {
+      "rule": "If quote UOM is case (CS) but PR UOM is each (EA), WARNING. Common error: 100 EA when quote was 100 CS.",
+      "uom_emphasis": "CS vs EA conversion",
+      "typical_units_per_case": null
+    },
+    "Services": {
+      "rule": "UOM should be time-based (HR, HRS, HOURS, DAY, WK, MO). If UOM is not time-based, WARNING: T&M services should use time units. Check total hours reasonable for duration.",
+      "uom_emphasis": "time_based",
+      "valid_time_uom": ["HR", "HRS", "HOURS", "DAY", "WK", "MO", "WEEK", "MONTH"]
+    },
+    "Professional Services": {
+      "rule": "Same as Services. Time-based UOM for T&M.",
+      "uom_emphasis": "time_based",
+      "valid_time_uom": ["HR", "HRS", "HOURS", "DAY", "WK", "MO"]
+    },
+    "Chemicals": {
+      "rule": "Verify quantity against hazmat storage limits and permits. Large quantities may require safety review. Check container size compatibility.",
+      "uom_emphasis": "hazmat_limits",
+      "notes": "No auto-fail; flag for review if very large qty"
+    },
+    "Print / Marketing": {
+      "rule": "Quantity must be valid print run increment (often 500 or 1000). Order 1,750 = invalid. Check warehouse capacity for storage.",
+      "uom_emphasis": "print_increment",
+      "valid_increments": [500, 1000],
+      "notes": "WARNING if qty not multiple of 500/1000"
+    }
+  },
+
+  "uom_equivalences": {
+    "each": ["EA", "EACH", "PC", "PK"],
+    "case": ["CS", "CASE"],
+    "box": ["BX", "BOX"],
+    "hours": ["HR", "HRS", "HOURS"],
+    "days": ["DAY", "DAYS"],
+    "weeks": ["WK", "WEEK", "WEEKS"],
+    "months": ["MO", "MONTH", "MONTHS"]
+  },
+
+  "category_lookup_notes": "Match PR category_l1 or category_l2 against keys (case-insensitive). If no match, apply only core rules 5.1–5.3, 5.7."
+}

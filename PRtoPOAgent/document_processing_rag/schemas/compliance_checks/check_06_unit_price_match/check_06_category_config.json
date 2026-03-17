@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 6 — Pricing Model by Category",
+  "description": "Reference data for Check 6: how pricing is validated per category (Summary: Checks 3–6 Category Applicability). Informs 6.1–6.6 which baseline to use (quote, contract, rate card).",
+
+  "pricing_model_by_category": {
+    "IT Hardware": {
+      "pricing_model": "catalog",
+      "description": "Discount off list price; compare PR to quote/catalog.",
+      "rules_emphasis": ["6.1", "6.5", "6.4"]
+    },
+    "IT": {
+      "pricing_model": "catalog",
+      "description": "Same as IT Hardware when category_l1 is IT.",
+      "rules_emphasis": ["6.1", "6.5", "6.4"]
+    },
+    "MRO / Facilities": {
+      "pricing_model": "contract",
+      "description": "Contract unit price; PR <= contract.",
+      "rules_emphasis": ["6.2", "6.1", "6.5"]
+    },
+    "MRO": {
+      "pricing_model": "contract",
+      "description": "Contract unit price.",
+      "rules_emphasis": ["6.2", "6.1", "6.5"]
+    },
+    "Professional Services": {
+      "pricing_model": "rate_card",
+      "description": "RATE CARD: Role-based rates; T&M hourly/daily.",
+      "rules_emphasis": ["6.3", "6.1", "6.5"]
+    },
+    "IT Services": {
+      "pricing_model": "rate_card",
+      "description": "RATE CARD: Technical rates.",
+      "rules_emphasis": ["6.3", "6.1", "6.5"]
+    },
+    "Construction": {
+      "pricing_model": "contract",
+      "description": "Trade rates + prevailing wage; contract ceiling.",
+      "rules_emphasis": ["6.2", "6.1", "6.5"]
+    },
+    "Direct Materials": {
+      "pricing_model": "negotiated",
+      "description": "Negotiated / index based; compare to quote.",
+      "rules_emphasis": ["6.1", "6.5", "6.6"]
+    },
+    "Office Supplies": {
+      "pricing_model": "catalog",
+      "description": "Catalog price; compare PR to quote.",
+      "rules_emphasis": ["6.1", "6.5"]
+    },
+    "Staffing": {
+      "pricing_model": "rate_card",
+      "description": "Bill rate + pay + markup %; rate card compliance.",
+      "rules_emphasis": ["6.3", "6.1", "6.5"]
+    },
+    "Services": {
+      "pricing_model": "rate_card",
+      "description": "T&M rate card; role-based rates.",
+      "rules_emphasis": ["6.3", "6.1", "6.5"]
+    }
+  },
+
+  "tolerance": {
+    "percent": 0.01,
+    "absolute_currency": 1.0,
+    "note": "Pass 6.1 if variance within +/- 1% or +/- $1."
+  },
+
+  "category_lookup_notes": "Match PR category_l1 or category_l2 against keys (case-insensitive). If no match, apply quote comparison (6.1, 6.5) and currency (6.6) only."
+}

@@ -1,17 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Check 4: Item Description Match — Result",
-  "description": "Output of Check 4. Verifies PR line descriptions semantically match quote/contract lines; line count alignment; scope coverage for services. Ref: PR_Compliance_Checks_3_to_6.md §Check 4.",
+  "description": "Output of Check 4. Verifies PR items/services accurately reflect quote/contract: description semantic match, manufacturer match, line count alignment, scope coverage (services). Ref: doc §Check 4.",
   "type": "object",
   "required": ["check_id", "check_name", "check_4_status"],
   "properties": {
     "check_id": { "type": "string", "const": "check_04", "description": "Stable check identifier." },
-    "check_name": { "type": "string", "const": "Item Description Accuracy", "description": "Display name." },
-    "check_4_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "check_name": { "type": "string", "const": "Item Description Match", "description": "Display name (doc §Check 4)." },
+    "check_4_status": { "type": "string", "enum": ["PASS", "FAIL", "WARNING", "NEEDS_REVIEW"], "description": "Overall result. WARNING = description or manufacturer mismatch - verify items (4.1, 4.3)." },
     "summary_description": { "type": "string", "description": "Short summary for UI." },
+    "description_semantic_match": { "type": "boolean", "description": "4.1: PR line descriptions semantically match quote/contract lines (>= 80%)." },
+    "manufacturer_match": { "type": "boolean", "description": "4.3: Manufacturer matches when specified on both PR and quote, or not specified." },
+    "line_count_alignment": { "type": "boolean", "description": "4.4: PR lines <= Quote lines; all PR lines have a match." },
+    "scope_coverage_services": { "type": "boolean", "description": "4.6: For services, PR scope within SOW scope; N/A if no SOW." },
+    "failure_reasons": { "type": "array", "items": { "type": "string" }, "description": "Specific failures for remediation." },
     "sub_checks": {
       "type": "array",
-      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } },
+      "description": "4.1 Description Semantic Match, 4.3 Manufacturer Match, 4.4 Line Count Alignment, 4.6 Scope Coverage (Services)."
     },
     "field_level_assessment": {
       "type": "array",
@@ -26,20 +32,30 @@
   },
   "example": {
     "check_id": "check_04",
-    "check_name": "Item Description Accuracy",
+    "check_name": "Item Description Match",
     "check_4_status": "PASS",
-    "summary_description": "PR description matches quote line items",
+    "summary_description": "PR line descriptions match quote; line count aligned; manufacturer match.",
+    "description_semantic_match": true,
+    "manufacturer_match": true,
+    "line_count_alignment": true,
+    "scope_coverage_services": true,
+    "failure_reasons": [],
     "sub_checks": [
-      { "name": "PR description semantically matches quote items", "passed": true }
+      { "name": "4.1 Description Semantic Match (similarity >= 80%)", "passed": true },
+      { "name": "4.3 Manufacturer Match (when specified)", "passed": true },
+      { "name": "4.4 Line Count Alignment (PR <= Quote, all matched)", "passed": true },
+      { "name": "4.6 Scope Coverage - Services (PR within SOW scope)", "passed": true }
     ],
     "field_level_assessment": [
-      { "field_name": "Line Item Description", "status": "pass", "confidence": 0.92, "detail": "Semantic match between PR and quote descriptions" }
+      { "field_name": "Line 1 Description", "status": "pass", "confidence": 0.92, "detail": "Semantic match: Lenovo ThinkPad P16 vs quote line 1" },
+      { "field_name": "Line Count", "status": "pass", "confidence": 1.0, "detail": "PR 2 lines, Quote 2 lines" },
+      { "field_name": "Manufacturer", "status": "pass", "confidence": 1.0, "detail": "Lenovo on both PR and quote" }
     ],
     "evidence": [
-      { "field": "PR Description", "extracted_value": "Digital marketing strategy consulting", "pr_value": "Digital marketing strategy consulting", "match": "Match" },
-      { "field": "Quote Line 1", "extracted_value": "Marketing strategy & digital campaign planning(92%)", "pr_value": "Semantic match: 92%", "match": "Match" }
+      { "field": "PR Line 1", "extracted_value": "Lenovo ThinkPad P16 Gen 2 — i7/32GB/1TB", "pr_value": "Quote Line 1: Lenovo ThinkPad P16 Mobile Workstation", "match": "Match" },
+      { "field": "PR Line 2", "extracted_value": "Lenovo Thunderbolt 4 Dock", "pr_value": "Quote Line 2: Lenovo Universal Thunderbolt 4 Dock", "match": "Match" }
     ],
-    "policy_reference": "Data Quality Standards v2.0",
+    "policy_reference": "Data Quality Standards v2.0; Check 4 Item Description Match §4.1–4.6",
     "agent_recommendation": null
   }
 }

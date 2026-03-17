@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 6: Unit Price Match — Input Reference",
+  "description": "Data sources and fields required for Check 6 (doc §6.6). Used to build context for LLM and deterministic fallback.",
+
+  "from_pr_line_items": {
+    "source": "PR Line Items (System Data)",
+    "fields": [
+      { "field": "pr_line_items[].unit_price", "data_type": "decimal", "notes": "unit_price_usd", "used_in_rule": "6.1–6.6 All price comparison rules" },
+      { "field": "pr_line_items[].extended_amount", "data_type": "decimal", "used_in_rule": "Total vs quote total" }
+    ]
+  },
+
+  "from_pr_header": {
+    "source": "PR Header (System Data)",
+    "fields": [
+      { "field": "pr_currency", "data_type": "string", "used_in_rule": "6.6 Currency alignment" },
+      { "field": "pr_category_l1", "data_type": "string", "used_in_rule": "Determine pricing model (catalog vs contract vs rate card)" }
+    ]
+  },
+
+  "from_quote": {
+    "source": "Quote (Extracted)",
+    "fields": [
+      { "field": "quote.line_items[].unit_price", "data_type": "decimal", "used_in_rule": "6.1, 6.5 Quote price comparison" },
+      { "field": "quote.currency", "data_type": "string", "used_in_rule": "6.6 Currency for conversion" }
+    ]
+  },
+
+  "from_contract": {
+    "source": "Contract (Reference Data)",
+    "fields": [
+      { "field": "contract.price.value", "data_type": "decimal", "used_in_rule": "6.2 Contract price ceiling" },
+      { "field": "contract.list_price", "data_type": "decimal", "used_in_rule": "6.4 List price for discount calc" },
+      { "field": "contract.discount_percentage", "data_type": "decimal", "used_in_rule": "6.4 Expected discount %" }
+    ]
+  },
+
+  "from_rate_card": {
+    "source": "Approved Rate Card (Reference Data)",
+    "fields": [
+      { "field": "rate_card.role", "data_type": "string", "used_in_rule": "6.3 Role name for matching" },
+      { "field": "rate_card.approved_rate", "data_type": "decimal", "used_in_rule": "6.3 Maximum approved rate" },
+      { "field": "rate_card.effective_date", "data_type": "date", "used_in_rule": "6.3 Current rate card version" },
+      { "field": "rate_card.expiry_date", "data_type": "date", "used_in_rule": "6.3 Rate card not expired" }
+    ]
+  }
+}

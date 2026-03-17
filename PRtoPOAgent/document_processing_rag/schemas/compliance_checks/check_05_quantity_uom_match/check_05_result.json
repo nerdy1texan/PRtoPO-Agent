@@ -1,17 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Check 5: Quantity & Unit of Measure Match — Result",
-  "description": "Output of Check 5. Verifies PR quantities and UOM match quote; UOM equivalent (EA=EACH=Hrs=Hours). Ref: PR_Compliance_Checks_3_to_6.md §Check 5.",
+  "title": "Check 5: Quantity & UOM Match — Result",
+  "description": "Output of Check 5. Verifies PR quantities and UOM match quote; partial order allowed (PR <= Quote); UOM equivalent and UOM-price alignment; contract MOQ/increment when available. Ref: doc §Check 5.",
   "type": "object",
   "required": ["check_id", "check_name", "check_5_status"],
   "properties": {
     "check_id": { "type": "string", "const": "check_05", "description": "Stable check identifier." },
-    "check_name": { "type": "string", "const": "Quantity & Unit of Measure", "description": "Display name." },
-    "check_5_status": { "type": "string", "enum": ["PASS", "FAIL", "NEEDS_REVIEW"], "description": "Overall result." },
+    "check_name": { "type": "string", "const": "Quantity & UOM Match", "description": "Display name (doc §Check 5)." },
+    "check_5_status": { "type": "string", "enum": ["PASS", "FAIL", "WARNING", "NEEDS_REVIEW"], "description": "Overall result. WARNING = quantity differs from quote (5.1) or category-specific (e.g. EA vs CS)." },
     "summary_description": { "type": "string", "description": "Short summary for UI." },
+    "quantity_match": { "type": "boolean", "description": "5.1: PR quantity equals quote quantity per matched line (exact)." },
+    "partial_order_ok": { "type": "boolean", "description": "5.2: PR qty <= Quote qty for each line; PR does not exceed quote." },
+    "uom_match": { "type": "boolean", "description": "5.3: UOM matches or is equivalent (EA=EACH=PC, CS=CASE, BX=BOX, Hrs=Hours)." },
+    "uom_price_alignment": { "type": "boolean", "description": "5.7: PR UOM consistent with quote pricing UOM (per-each vs per-case)." },
+    "failure_reasons": { "type": "array", "items": { "type": "string" }, "description": "Specific failures for remediation." },
     "sub_checks": {
       "type": "array",
-      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } }
+      "items": { "type": "object", "properties": { "name": { "type": "string" }, "passed": { "type": "boolean" } } },
+      "description": "5.1 Quantity Match, 5.2 Partial Order, 5.3 UOM Match/Equivalent, 5.7 UOM-Price Alignment; optionally 5.4 MOQ, 5.5 Max qty, 5.6 Order increment."
     },
     "field_level_assessment": {
       "type": "array",
@@ -26,21 +32,29 @@
   },
   "example": {
     "check_id": "check_05",
-    "check_name": "Quantity & Unit of Measure",
+    "check_name": "Quantity & UOM Match",
     "check_5_status": "PASS",
-    "summary_description": "Quantity and UOM match",
+    "summary_description": "Quantities and UOM match; PR within quote.",
+    "quantity_match": true,
+    "partial_order_ok": true,
+    "uom_match": true,
+    "uom_price_alignment": true,
+    "failure_reasons": [],
     "sub_checks": [
-      { "name": "PR quantity matches quote quantity, UOM equivalent", "passed": true }
+      { "name": "5.1 Quantity Match (PR = Quote per line)", "passed": true },
+      { "name": "5.2 Partial Order (PR <= Quote qty)", "passed": true },
+      { "name": "5.3 UOM Match or Equivalent", "passed": true },
+      { "name": "5.7 UOM-Price Alignment", "passed": true }
     ],
     "field_level_assessment": [
-      { "field_name": "Quantity", "status": "pass", "confidence": 0.99, "detail": "200 Hours (exact match)" },
-      { "field_name": "Unit of Measure", "status": "pass", "confidence": 0.99, "detail": "Hours (normalized from \"Hrs\")" }
+      { "field_name": "Quantity", "status": "pass", "confidence": 1.0, "detail": "25 Each, 25 Each — exact match" },
+      { "field_name": "UOM", "status": "pass", "confidence": 1.0, "detail": "Each (EA) equivalent to quote" }
     ],
     "evidence": [
-      { "field": "PR Quantity", "extracted_value": "200 Hours", "pr_value": "200 Hours", "match": "Match" },
-      { "field": "Quote Quantity", "extracted_value": "200 Hrs(99%)", "pr_value": "Normalized: Hours", "match": "Match" }
+      { "field": "PR Line 1 Qty", "extracted_value": "25", "pr_value": "25", "match": "Match" },
+      { "field": "PR Line 1 UOM", "extracted_value": "Each", "pr_value": "EA", "match": "Match" }
     ],
-    "policy_reference": "Data Quality Standards v2.0",
+    "policy_reference": "Data Quality Standards v2.0; Check 5 §5.1–5.7",
     "agent_recommendation": null
   }
 }

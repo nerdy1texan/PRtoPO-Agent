@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 4 — Catalog/SKU Applicability by Category",
+  "description": "Reference data for Check 4: how to validate item descriptions and coverage by spend category (doc §4.4). Informs LLM and fallback which catalog/scope logic applies.",
+
+  "catalog_applicability_by_category": {
+    "IT Hardware": {
+      "catalog_type": "Approved product list, standard configs",
+      "coverage_check_logic": "PR item must be on an IT-approved hardware list. Non-standard items require exception approval.",
+      "match_emphasis": "description_and_manufacturer"
+    },
+    "IT": {
+      "catalog_type": "Approved product list, standard configs",
+      "coverage_check_logic": "Same as IT Hardware when category_l1 is IT.",
+      "match_emphasis": "description_and_manufacturer"
+    },
+    "MRO": {
+      "catalog_type": "Storeroom catalog, VMI items",
+      "coverage_check_logic": "Check against storeroom master. VMI items should be auto-replenished, not PR.",
+      "match_emphasis": "description_and_sku"
+    },
+    "MRO / Facilities": {
+      "catalog_type": "Storeroom catalog, VMI items",
+      "coverage_check_logic": "Check against storeroom master. VMI items should be auto-replenished, not PR.",
+      "match_emphasis": "description_and_sku"
+    },
+    "Office Supplies": {
+      "catalog_type": "Punch-out catalog",
+      "coverage_check_logic": "Should match a catalog item from punch-out. Off-catalog items trigger review.",
+      "match_emphasis": "description_and_sku"
+    },
+    "Lab Supplies": {
+      "catalog_type": "Approved vendor catalog, controlled items list",
+      "coverage_check_logic": "Verify against approved vendor catalog. Controlled items require additional documentation.",
+      "match_emphasis": "description_and_manufacturer"
+    },
+    "Services": {
+      "catalog_type": "Rate card roles (not SKUs)",
+      "coverage_check_logic": "Check role/resource type against an approved rate card, not a product catalog. Use SOW scope for 4.6.",
+      "match_emphasis": "scope_within_sow"
+    },
+    "Professional Services": {
+      "catalog_type": "Rate card roles (not SKUs)",
+      "coverage_check_logic": "Check role/resource type against rate card; PR scope must fall within SOW scope.",
+      "match_emphasis": "scope_within_sow"
+    }
+  },
+
+  "category_lookup_notes": "Match PR category_l1 or category_l2 against keys (case-insensitive). If no match, apply generic description semantic match and line count alignment only."
+}

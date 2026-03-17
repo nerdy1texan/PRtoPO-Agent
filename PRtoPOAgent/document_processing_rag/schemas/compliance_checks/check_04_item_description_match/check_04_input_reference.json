@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Check 4: Item Description Match — Input Reference",
+  "description": "Data sources and fields required for Check 4 (doc §4.5). Used to build context for LLM and deterministic fallback.",
+
+  "from_pr_line_items": {
+    "source": "PR Line Items (System Data)",
+    "fields": [
+      { "field": "line_number", "data_type": "integer", "used_in_rule": "4.4 Line matching and ordering" },
+      { "field": "description", "data_type": "string", "notes": "item_short_description or item_long_description", "used_in_rule": "4.1 Semantic match target, 4.6 Scope coverage" },
+      { "field": "manufacturer", "data_type": "string", "used_in_rule": "4.3 Manufacturer validation" },
+      { "field": "pr_category_l1", "data_type": "string", "notes": "category_l1 from PR header or line", "used_in_rule": "4.4 Catalog/SKU applicability by category" }
+    ]
+  },
+
+  "from_quote": {
+    "source": "Quote (Extracted)",
+    "fields": [
+      { "field": "quote_line_items[].line_number", "data_type": "integer", "used_in_rule": "4.4 Line matching" },
+      { "field": "quote_line_items[].description", "data_type": "string", "used_in_rule": "4.1 Semantic comparison source" },
+      { "field": "quote_line_items[].manufacturer", "data_type": "string", "used_in_rule": "4.3 Manufacturer comparison" }
+    ]
+  },
+
+  "from_sow": {
+    "source": "SOW (Extracted - Services Only)",
+    "fields": [
+      { "field": "sow.scope_summary", "data_type": "string", "used_in_rule": "4.6 Scope coverage semantic match" },
+      { "field": "sow.in_scope[]", "data_type": "array of strings", "used_in_rule": "4.6 Explicit in-scope items for matching" },
+      { "field": "sow.out_of_scope[]", "data_type": "array of strings", "used_in_rule": "4.6 Explicit exclusions to check against" }
+    ]
+  },
+
+  "from_contract": {
+    "source": "Contract (Reference Data)",
+    "fields": [
+      { "field": "contract.catalog_items[]", "data_type": "array of objects", "properties": ["sku", "description", "manufacturer"], "used_in_rule": "4.5 Catalog lookup for SKU/description/manufacturer" }
+    ]
+  }
+}
