@@ -2,7 +2,7 @@
   "check_id": "check_02",
   "check_name": "Document Validity \u2014 Dates & Timings",
   "check_2_status": "PASS",
-  "summary_description": "All document dates and timings valid; quote and contract in effect for PR date.",
+  "summary_description": "All document dates and timings valid; quote and contract in effect for PR date and cover the delivery period.",
   "quotation_validity": {
     "quote_date_sequence_pass": true,
     "quote_not_expired_pass": true,
@@ -24,7 +24,15 @@
       "passed": true
     },
     {
-      "name": "Contract effective and not expired",
+      "name": "Contract effective on or before PR date",
+      "passed": true
+    },
+    {
+      "name": "Contract not expired as of PR date",
+      "passed": true
+    },
+    {
+      "name": "Contract covers the delivery period",
       "passed": true
     }
   ],
@@ -33,26 +41,62 @@
       "field_name": "Quote Date",
       "status": "pass",
       "confidence": 0.98,
-      "detail": "Quote dated 2026-01-13 (before PR date 2026-01-15)."
+      "detail": "Quote dated 2026-01-13, which is on or before PR date 2026-01-15."
     },
     {
       "field_name": "Quote Expiration",
       "status": "pass",
       "confidence": 0.96,
-      "detail": "Valid through 2026-03-15."
+      "detail": "Quote valid through 2026-03-15, which is after PR date 2026-01-15."
+    },
+    {
+      "field_name": "Contract Effective Date",
+      "status": "pass",
+      "confidence": 0.99,
+      "detail": "Contract effective 2024-01-01, which is on or before PR date 2026-01-15."
+    },
+    {
+      "field_name": "Contract End Date",
+      "status": "pass",
+      "confidence": 0.99,
+      "detail": "Contract ends 2026-12-31, which is after PR date 2026-01-15 and covers the 'need by' date 2026-02-28."
+    },
+    {
+      "field_name": "Delivery Period Coverage",
+      "status": "pass",
+      "confidence": 0.95,
+      "detail": "Contract end date 2026-12-31 covers the PR 'need by' date 2026-02-28."
     }
   ],
   "evidence": [
     {
+      "field": "PR Date",
+      "extracted_value": "2026-01-15",
+      "pr_value": "2026-01-15",
+      "match": "N/A"
+    },
+    {
       "field": "Quote Date",
       "extracted_value": "2026-01-13",
-      "pr_value": "PR Date: 2026-01-15",
+      "pr_value": "Required: <= 2026-01-15",
       "match": "Match"
     },
     {
       "field": "Quote Expiration",
       "extracted_value": "2026-03-15",
       "pr_value": "Required: >= 2026-01-15",
+      "match": "Match"
+    },
+    {
+      "field": "Contract Effective Date",
+      "extracted_value": "2024-01-01",
+      "pr_value": "Required: <= 2026-01-15",
+      "match": "Match"
+    },
+    {
+      "field": "Contract End Date",
+      "extracted_value": "2026-12-31",
+      "pr_value": "Required: >= 2026-01-15 and >= 2026-02-28 (Need By Date)",
       "match": "Match"
     }
   ],

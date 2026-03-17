@@ -1,48 +1,88 @@
 {
   "check_id": "check_04",
-  "check_name": "Item Description Accuracy",
-  "check_4_status": "PASS",
-  "summary_description": "PR description matches quote line items",
+  "check_name": "Item Description Match",
+  "check_4_status": "FAIL",
+  "summary_description": "The Purchase Requisition (PR-2026-007842) contains no line items, therefore it cannot accurately reflect the quote. This results in critical failures for line count alignment and item matching.",
+  "description_semantic_match": false,
+  "manufacturer_match": false,
+  "line_count_alignment": false,
+  "scope_coverage_services": true,
+  "failure_reasons": [
+    "PR contains no line items.",
+    "PR line count does not align with quote (0 vs 2).",
+    "No PR items to semantically match against quote.",
+    "No PR items to check manufacturer against quote."
+  ],
   "sub_checks": [
     {
-      "name": "PR description semantically matches quote items",
+      "name": "4.1 Description Semantic Match (similarity >= 80%)",
+      "passed": false
+    },
+    {
+      "name": "4.3 Manufacturer Match (when specified)",
+      "passed": false
+    },
+    {
+      "name": "4.4 Line Count Alignment (PR <= Quote, all matched)",
+      "passed": false
+    },
+    {
+      "name": "4.6 Scope Coverage - Services (PR within SOW scope)",
       "passed": true
     }
   ],
   "field_level_assessment": [
     {
-      "field_name": "Line Item Description",
+      "field_name": "PR Line Items",
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "No line items found on the Purchase Requisition to compare against the quote."
+    },
+    {
+      "field_name": "Line Count",
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "PR has 0 lines, Quote has 2 lines. The PR does not reflect the quote."
+    },
+    {
+      "field_name": "Description Semantic Match",
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "Cannot perform semantic match as PR has no line items."
+    },
+    {
+      "field_name": "Manufacturer Match",
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "Cannot perform manufacturer match as PR has no line items."
+    },
+    {
+      "field_name": "Scope Coverage (Services)",
       "status": "pass",
-      "confidence": 0.92,
-      "detail": "Semantic match between PR and quote descriptions"
+      "confidence": 1.0,
+      "detail": "The PR is for products, not services. The intended product category (IT Hardware: End User Computing) is covered by the MSA. This check is effectively N/A for services, hence marked as pass."
     }
   ],
   "evidence": [
     {
-      "field": "PR Description",
-      "extracted_value": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
-      "pr_value": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX, 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS, Windows 11 Pro, 3-Year Premier Onsite.",
-      "match": "Match"
+      "field": "PR Line Items",
+      "extracted_value": "[]",
+      "pr_value": "No line items present on PR.",
+      "match": "No Match (Missing)"
     },
     {
       "field": "Quote Line 1",
-      "extracted_value": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
-      "pr_value": "Lenovo ThinkPad P16 Gen 2 \u2014 i7/32GB/1TB/RTX A1000",
-      "match": "Match"
-    },
-    {
-      "field": "PR Description",
-      "extracted_value": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
-      "pr_value": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD.",
-      "match": "Match"
+      "extracted_value": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
+      "pr_value": "No corresponding PR line item.",
+      "match": "No Match"
     },
     {
       "field": "Quote Line 2",
-      "extracted_value": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD",
-      "pr_value": "Lenovo ThinkPad Thunderbolt 4 Dock \u2014 40B00135US",
-      "match": "Match"
+      "extracted_value": "Lenovo ThinkPad Universal Thunderbolt 4 Dock 4x USB-A 3.2, 1x USB-C 3.2, 2x Thunderbolt 4 (downstream), 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD, Kensington Nano Lock Slot",
+      "pr_value": "No corresponding PR line item.",
+      "match": "No Match"
     }
   ],
-  "policy_reference": "Data Quality Standards v2.0",
-  "agent_recommendation": null
+  "policy_reference": "Data Quality Standards v2.0; Check 4 Item Description Match \u00a74.1\u20134.6",
+  "agent_recommendation": "The Purchase Requisition (PR-2026-007842) is missing all line items. It cannot be processed as it does not specify what is being requested. Please amend the PR to include the requested items as per the attached quote (Q25-0847-MTECH) before resubmission."
 }

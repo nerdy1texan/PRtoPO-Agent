@@ -2,28 +2,28 @@
   "check_id": "check_01",
   "check_name": "Attachment Existence & Classification",
   "check_1_status": "PASS",
-  "attachments_found": 3,
+  "attachments_found": 4,
   "classified_documents": [
     {
       "filename": "01_PR_Header_and_LineItems.xlsx",
       "document_type": "PR Form",
       "confidence": 0.99,
-      "reason": "Excel with sheets PR Header, PR Line Items, PR Attachments; columns PR Number, PR Status, Requestor Name, Total Estimated Value, and detailed PR information."
+      "reason": "The file is an Excel workbook with sheets named 'PR Header', 'PR Line Items', and 'PR Attachments'. It contains columns typical of a Purchase Requisition form such as 'PR Number', 'PR Status', 'Requestor Name', 'Total Estimated Value', and 'Justification Text'."
     },
     {
       "filename": "02_CDW_Quote_Q25-0847.pdf",
       "document_type": "Quotation",
-      "confidence": 0.95,
-      "reason": "Quote number, account number, quote date, valid through, line items with prices, subtotal, shipping, estimated tax, and total."
+      "confidence": 0.99,
+      "reason": "The document explicitly states 'QUOTATION' at the top, includes a 'Quote Number', 'Quote Date', 'Valid Through' date, 'BILL TO / SHIP TO' information, and a detailed list of 'QUOTED ITEMS' with quantities, unit prices, extended prices, subtotal, shipping, estimated tax, and total. The file name also contains 'Quote'."
     },
     {
       "filename": "02b_MSA_CDW_2024_0156_Executed.pdf",
       "document_type": "Contract",
       "confidence": 0.99,
-      "reason": "Agreement, parties, effective/expiry date, scope of products and services."
+      "reason": "The document is explicitly titled 'MASTER SERVICE AGREEMENT', identifies parties, an effective date, and includes sections for term, renewal, and scope, which aligns perfectly with the definition of a Contract provided in the instructions ('Agreement, Contract, Master Service Agreement, parties, effective/expiry')."
     }
   ],
-  "valid_support_docs_found": 3,
+  "valid_support_docs_found": 2,
   "policy_requirements_met": true,
   "missing_requirements": [],
   "invoice_detected": false,
@@ -46,32 +46,32 @@
       "field_name": "Attachment Count",
       "status": "pass",
       "confidence": 1.0,
-      "detail": "3 documents attached (meets minimum requirement)"
+      "detail": "4 documents attached (meets minimum requirement of >=1)"
     },
     {
-      "field_name": "Quote Document Type",
-      "status": "pass",
-      "confidence": 0.95,
-      "detail": "02_CDW_Quote_Q25-0847.pdf classified as Quote"
-    },
-    {
-      "field_name": "Contract Document Type",
+      "field_name": "Supporting Document Types",
       "status": "pass",
       "confidence": 0.99,
-      "detail": "02b_MSA_CDW_2024_0156_Executed.pdf classified as Contract"
+      "detail": "Quotation (02_CDW_Quote_Q25-0847.pdf) and Contract (02b_MSA_CDW_2024_0156_Executed.pdf) found. Total value $71,250 requires 1 contract or 3 quotes. A contract is present and satisfies the requirement."
     }
   ],
   "evidence": [
     {
       "field": "Attachments Found",
-      "extracted_value": "3 documents",
-      "pr_value": "Required: \u22651",
+      "extracted_value": "4 documents",
+      "pr_value": "Required: >=1",
       "match": "Match"
     },
     {
       "field": "Document Types",
-      "extracted_value": "PR Form (99%), Quotation (95%), Contract (99%)",
-      "pr_value": "Expected: Quotation or Contract",
+      "extracted_value": "Quotation (99%), Contract (99%)",
+      "pr_value": "Expected: Quote or Contract (for value tier >=$50000, 1 Contract is sufficient)",
+      "match": "Match"
+    },
+    {
+      "field": "Total Estimated Value",
+      "extracted_value": "$71,250",
+      "pr_value": "Policy Tier: >=$50,000",
       "match": "Match"
     }
   ],

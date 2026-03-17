@@ -58,9 +58,12 @@ langgraph>=0.2.0
 # For pipeline/agent diagram rendering (Mermaid PNG)
 grandalf>=0.1
 
-# RAG / vector (Section 7–8). Required per mode.
-# AWS mode: opensearch-py for OpenSearch; Titan via langchain-aws (already above).
-# Local mode: qdrant-client for Qdrant Cloud; sentence-transformers for embeddings.
+# RAG / vector (Section 7–8). Required per chosen VECTOR_STORE_PROVIDER.
+# pgvector: AWS recommended — needs PostgreSQL with pgvector extension; uses sqlalchemy + psycopg2 (above).
+# qdrant-client: local recommended — Qdrant Cloud or self-hosted.
+# opensearch-py: optional alternative — AWS OpenSearch.
+# sentence-transformers: local embeddings (all-MiniLM-L6-v2); Titan via langchain-aws (above) for AWS.
+pgvector>=0.3.0
 qdrant-client>=1.7.0
 opensearch-py>=2.4.0
 sentence-transformers>=2.2.0

@@ -2,7 +2,7 @@
 
 **Goal:** Build a PR validation AI product that ingests a Purchase Requisition (PR) plus attachments (quotes, MSAs, SOWs), classifies and parses documents into structured JSON, persists them, and runs **12 compliance checks** to determine if the PR is compliant before conversion to a Purchase Order (PO).
 
-This repo contains **schemas**, **compliance check specs**, **synthetic data**, **architecture docs**, and a **master notebook** that runs the full pipeline locally or against AWS (Bedrock, RDS, Titan).
+This repo contains **schemas**, **compliance check specs**, **synthetic data**, **architecture docs**, and a **master notebook** that runs the full pipeline locally or against AWS (Bedrock Claude Sonnet 4, Titan V2 embeddings, PGVector).
 
 ---
 
@@ -26,7 +26,7 @@ This repo contains **schemas**, **compliance check specs**, **synthetic data**, 
 
 ## Getting Started
 
-Choose **ENV_MODE**: **`aws`** (Bedrock + OpenSearch + Titan) or **`local`** (Groq/Gemini + Qdrant Cloud + sentence-transformers). Copy **`document_processing_rag/.env.example`** to **`.env`** and set the required variables for your mode (Section 0 validates them). For a **reproducible environment** with a fixed Python version on any machine, use the [Conda environment file](#install-via-conda-environment-file-reproducible). Otherwise follow **Local setup** for conda/venv + API keys + SQLite. Use **[DBeaver](https://dbeaver.io/)** to view the structured database.
+Choose **ENV_MODE**: **`aws`** (Bedrock Claude Sonnet 4 + Titan embeddings + PGVector) or **`local`** (Groq/Gemini + sentence-transformers + Qdrant). You can also **mix-and-match** any LLM, embedding, and vector store provider independently (e.g. Gemini LLM + Titan embeddings + PGVector). Copy **`document_processing_rag/.env.example`** to **`.env`** and set the required variables for your mode (Section 0 validates them). For a **reproducible environment** with a fixed Python version on any machine, use the [Conda environment file](#install-via-conda-environment-file-reproducible). Otherwise follow **Local setup** for conda/venv + API keys + SQLite. Use **[DBeaver](https://dbeaver.io/)** to view the structured database.
 
 ---
 
@@ -158,11 +158,11 @@ QDRANT_API_KEY=your_qdrant_cloud_api_key
    jupyter notebook PR_to_PO_Master.ipynb
    # or: jupyter lab
    ```
-2. Run cells in order: **Section 0** (env detection & validation) → **1** (paths, LLM) → **2** (schemas) → **3** (list from input) → **4** (classify) → **5** (parse) → **5b** (save parsed outputs to output/) → **6** (structured DB: single `pr` table + structured quote/MSA) → **7** (RAG: chunking, embeddings, vector store — OpenSearch or Qdrant) → **8** (agentic orchestrator: SQL + RAG, test question) → **9** (Check 1) → **10** (Check 2) → **11** (summary) → **12** (write check results).
+2. Run cells in order: **Section 0** (env detection & validation) → **1** (paths, LLM) → **2** (schemas) → **3** (list from input) → **4** (classify) → **5** (parse) → **5b** (save parsed outputs to output/) → **6** (structured DB: single `pr` table + structured quote/MSA) → **7** (RAG: chunking, embeddings, vector store — PGVector, Qdrant, or OpenSearch) → **8** (agentic orchestrator: SQL + RAG, test question) → **9** (Check 1) → **10** (Check 2) → **11** (summary) → **12** (write check results).
 3. Results:
    - **output/** — `pr.json`, `parsed_quotes.json`, `parsed_msas.json` (saved in 5b); `check1_result.json`, `check2_result.json` (saved in 12).
    - **Database** — Structured tables in SQLite (`pr_validation.db`) or PostgreSQL. Open with [DBeaver](https://dbeaver.io/) to browse **pr**, **parsed_quote**, **parsed_msa**.
-   - **Vector store** — Chunks indexed in Qdrant (local) or OpenSearch (AWS); used by the orchestrator in Section 8.
+   - **Vector store** — Chunks indexed in PGVector (AWS), Qdrant (local), or OpenSearch; used by the orchestrator in Section 8.
 
 **Quick start checklist (local)**
 
@@ -379,9 +379,9 @@ jupyter nbconvert --to notebook --execute PR_to_PO_Master.ipynb --output PR_to_P
 
 ---
 
-### AWS setup (Bedrock, OpenSearch, optional RDS)
+### AWS setup (Bedrock + Titan + PGVector)
 
-Use this when you want to run the notebook against **Amazon Bedrock** (and optionally **RDS**) instead of Groq and local Postgres.
+Use this when you want to run the notebook against **Amazon Bedrock** (Claude Sonnet 4 LLM + Titan V2 embeddings) with **PGVector** on RDS/Aurora PostgreSQL for the vector store.
 
 #### 1. AWS account and CLI
 
@@ -391,16 +391,60 @@ Use this when you want to run the notebook against **Amazon Bedrock** (and optio
   # Enter Access Key ID, Secret Access Key, default region (e.g. us-east-1)
   ```
 
+#### 1a. Where each AWS env var comes from (quick checklist)
+
+This maps the AWS services you must enable/create to the variables you’ll put in `.env`.
+
+- **AWS_REGION**:
+  - Pick the region you’re operating in (example: `us-east-1`).
+  - Must match the region where Bedrock is used and where your RDS/Aurora instance lives (or is reachable).
+
+- **AWS_PROFILE** (optional alternative to explicit keys):
+  - If you use named AWS CLI profiles: check `~/.aws/credentials` and `~/.aws/config` after running `aws configure --profile <name>`.
+  - If running on AWS compute (EC2/ECS/EKS/Lambda) with an IAM role, you often **don’t** need `AWS_PROFILE` or static keys at all.
+
+- **BEDROCK_MODEL_ID**:
+  - AWS Console → **Amazon Bedrock** → **Model access** → request/enable access to **Claude Sonnet 4**.
+  - Use the model ID in `.env` (default: `anthropic.claude-sonnet-4-20250514-v1:0`).
+
+- **TITAN_EMBED_MODEL_ID** and **TITAN_EMBED_DIM**:
+  - AWS Console → **Amazon Bedrock** → **Model access** → enable **Titan Text Embeddings V2**.
+  - Default model ID: `amazon.titan-embed-text-v2:0`
+  - Recommended dimension: `1024` (Titan v2 supports `256`, `512`, `1024`).
+
+- **PGVECTOR_URL** (vector store DB connection string):
+  - Create a PostgreSQL database with pgvector:
+    - AWS Console → **RDS** → **Create database** (PostgreSQL 15+) *or* **Aurora PostgreSQL**.
+    - Ensure networking allows your notebook runtime to connect (VPC + Security Group inbound on port `5432`).
+    - Connect to the DB and run: `CREATE EXTENSION IF NOT EXISTS vector;`
+  - Values you’ll need from the RDS/Aurora console:
+    - **Endpoint** (host), **Port** (typically `5432`), **DB name**, **Username**, **Password**
+  - Build the URL like:
+    - `postgresql+psycopg2://USER:PASSWORD@HOST:5432/DB_NAME`
+  - Tip: if your password has special characters, URL-encode it (or use a simpler password).
+
+- **PGVECTOR_TABLE** (optional):
+  - Just a table name used by the notebook for chunk storage (default: `rag_chunks`).
+
+- **DATABASE_URL** (optional structured DB, separate from vector store):
+  - Only needed if you want the *structured* tables (PR/quote/MSA) in Postgres instead of local SQLite.
+  - You can point it to the **same** Postgres instance as `PGVECTOR_URL` or a different one.
+
 #### 2. Bedrock model access
 
-- In **AWS Console** → **Amazon Bedrock** → **Model access** (or **Manage model access**), enable the model you plan to use (e.g. **Claude 3.5 Haiku** or **Sonnet**).
-- Note the **model ID** (e.g. `anthropic.claude-3-5-haiku-20241022-v2:0`). You’ll set it as `BEDROCK_MODEL_ID`.
+- In **AWS Console** → **Amazon Bedrock** → **Model access**, enable:
+  - **Claude Sonnet 4** (Anthropic) — for the LLM.
+  - **Titan Text Embeddings V2** (Amazon) — for embeddings (1024-dim, highest quality).
+- Note the **model IDs**:
+  - LLM: `anthropic.claude-sonnet-4-20250514-v1:0` (default).
+  - Embeddings: `amazon.titan-embed-text-v2:0` (default; V2 supports dims 256/512/1024).
+- Docs: [Bedrock model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html), [Titan Embeddings](https://docs.aws.amazon.com/bedrock/latest/userguide/titan-embedding-models.html)
 
 #### 3. IAM permissions
 
 - The IAM user or role used by the notebook needs at least:
-  - **bedrock:InvokeModel** (and optionally **bedrock:InvokeModelWithResponseStream**) for the Bedrock model.
-  - If you use RDS: **rds** (connect to the DB; usually you connect from the notebook using a connection string and a password, not IAM auth, unless you set that up).
+  - **bedrock:InvokeModel** (and optionally **bedrock:InvokeModelWithResponseStream**) for both the LLM and Titan embeddings models.
+  - If you use RDS: network access to the DB (usually via connection string + password, not IAM auth).
 - Example policy (Bedrock only; restrict resource as needed):
   ```json
   {
@@ -415,57 +459,67 @@ Use this when you want to run the notebook against **Amazon Bedrock** (and optio
   }
   ```
 
-#### 4. RDS (optional, for production DB)
+#### 4. PGVector (vector store) + optional RDS for structured data
 
-- Create a **PostgreSQL** DB in RDS (e.g. **Create database** → PostgreSQL 15, pick instance class and storage).
-- Note **endpoint**, **port**, **master username**, and **master password**.
-- Ensure the notebook’s network can reach RDS (security group allows inbound on the DB port from your IP or VPC).
-- Connection string format: `postgresql://USER:PASSWORD@RDS_ENDPOINT:5432/DB_NAME`
+- Create an **RDS PostgreSQL 15+** or **Aurora PostgreSQL** instance (both support **pgvector**).
+- Connect and enable the extension: `CREATE EXTENSION IF NOT EXISTS vector;`
+- Note **endpoint**, **port**, **username**, **password**, **database name**.
+- Connection string format: `postgresql+psycopg2://USER:PASSWORD@HOST:5432/DB_NAME`
+- Ensure the notebook’s network can reach RDS (security group allows inbound on the DB port).
+- Docs: [pgvector on RDS](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL_Pgvector.html)
+- You can use the **same** RDS instance for both PGVector (vector store via `PGVECTOR_URL`) and the structured DB (`DATABASE_URL`), or separate instances.
 
 #### 5. Environment variables for AWS
 
-Set these so the notebook uses **AWS** instead of local Groq (and optional RDS):
-
 ```env
-# AWS region (e.g. us-east-1)
+ENV_MODE=aws
+
 AWS_REGION=us-east-1
-# Or use a named profile: AWS_PROFILE=your_profile
+# AWS_PROFILE=your_profile   # alternative to default creds
 
-# Bedrock model (use the ID from Bedrock model access)
-BEDROCK_MODEL_ID=anthropic.claude-3-5-haiku-20241022-v2:0
+BEDROCK_MODEL_ID=anthropic.claude-sonnet-4-20250514-v1:0
+TITAN_EMBED_MODEL_ID=amazon.titan-embed-text-v2:0
+TITAN_EMBED_DIM=1024
 
-# Optional: RDS PostgreSQL
-# DATABASE_URL=postgresql://admin:password@your-rds-endpoint.region.rds.amazonaws.com:5432/pr_validation
+PGVECTOR_URL=postgresql+psycopg2://USER:PASSWORD@your-rds-endpoint.region.rds.amazonaws.com:5432/DB_NAME
+PGVECTOR_TABLE=rag_chunks
+
+# Optional: structured DB (omit for SQLite default)
+# DATABASE_URL=postgresql+psycopg2://USER:PASSWORD@your-rds-endpoint:5432/pr_validation
 ```
 
-- Do **not** set `GROQ_API_KEY` when you want to use Bedrock; the notebook detects AWS when `AWS_REGION` (or `AWS_PROFILE`) and `BEDROCK_MODEL_ID` are set.
+See `.env.example` for full details on where to get each AWS variable.
 
 #### 6. Dependencies for AWS
 
+All AWS dependencies are included in `requirements.txt` / `environment.yml`:
+
 ```bash
 conda activate pr2po
-pip install langchain-aws boto3
+pip install -r requirements.txt
+# Key AWS packages: langchain-aws, boto3, psycopg2-binary, pgvector
 ```
 
 #### 7. Run the notebook on AWS
 
 1. Ensure **input** has your documents (or use synthetic data).
-2. Open `PR_to_PO_Master.ipynb` and run **Section 0**. It should print something like `Detected mode: aws` and use Bedrock.
-3. Run Sections **1** through **10** in order. DB writes go to RDS if `DATABASE_URL` is set; otherwise the notebook still uses SQLite locally (or you can set a local Postgres URL).
+2. Open `PR_to_PO_Master.ipynb` and run **Section 0**. It should print `ENV_MODE: aws` and confirm Bedrock + Titan + PGVector.
+3. Run Sections **1** through **16** in order. DB writes go to RDS if `DATABASE_URL` is set; otherwise the notebook still uses SQLite locally.
 
 ---
 
 ### Quick reference: Local vs AWS
 
-| Step              | Local                               | AWS (production)                          |
+| Component         | Local (default)                     | AWS (production)                          |
 |-------------------|-------------------------------------|-------------------------------------------|
 | **ENV_MODE**      | `local`                             | `aws`                                      |
-| **.env**          | Copy `.env.example` → `.env`; set `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY` | Set `AWS_REGION` (or `AWS_PROFILE`), `BEDROCK_MODEL_ID`, `OPENSEARCH_ENDPOINT` |
-| **LLM**           | Groq                                | Bedrock                                    |
-| **Vector store**  | Qdrant Cloud                        | OpenSearch                                 |
-| **Embeddings**    | sentence-transformers all-MiniLM-L6-v2 | Titan (Bedrock)                         |
-| **DB**            | SQLite (default); [DBeaver](https://dbeaver.io/). Optional: PostgreSQL | RDS PostgreSQL (set `DATABASE_URL`)       |
-| **Input/Output** | `document_processing_rag/input` and `output` | Same (or S3 if extended)              |
+| **.env**          | Copy `.env.example` → `.env`; set `GROQ_API_KEY`, `QDRANT_URL`, `QDRANT_API_KEY` | Set `AWS_REGION`, `BEDROCK_MODEL_ID`, `PGVECTOR_URL` |
+| **LLM**           | Groq or Gemini                      | Bedrock (Claude Sonnet 4)                  |
+| **Embeddings**    | sentence-transformers (384-dim)     | Titan V2 (1024-dim)                        |
+| **Vector store**  | Qdrant Cloud                        | PGVector (RDS/Aurora PostgreSQL)           |
+| **DB**            | SQLite (default); [DBeaver](https://dbeaver.io/) | RDS PostgreSQL (set `DATABASE_URL`)       |
+| **Input/Output**  | `document_processing_rag/input` and `output` | Same (or S3 if extended)              |
+| **Mix-and-match** | Override any provider: `LLM_PROVIDER`, `EMBEDDINGS_PROVIDER`, `VECTOR_STORE_PROVIDER` | Same |
 
 ---
 
@@ -521,8 +575,8 @@ End-to-end flow:
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │  RAG & VECTOR STORAGE (Section 7)                                                │
 │  • Chunking: RecursiveCharacterTextSplitter (500 chars, 50 overlap)              │
-│  • Embeddings: Titan (AWS) or sentence-transformers all-MiniLM-L6-v2 (local)     │
-│  • Vector store: OpenSearch (AWS) or Qdrant Cloud (local); index chunks           │
+│  • Embeddings: Titan V2 1024-dim (AWS) or sentence-transformers 384-dim (local)  │
+│  • Vector store: PGVector (AWS) or Qdrant Cloud (local); index chunks             │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                         │
                                         ▼
@@ -558,7 +612,7 @@ End-to-end flow:
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**Shared data layer (production):** RDS, S3, OpenSearch (vector store), Bedrock (LLM + Titan embeddings).  
+**Shared data layer (production):** RDS, S3, PGVector (vector store), Bedrock (LLM + Titan V2 embeddings).  
 **Local:** SQLite, [Qdrant Cloud](https://cloud.qdrant.io/) (vector store), Groq (LLM), sentence-transformers (embeddings). Use [DBeaver](https://dbeaver.io/) to view the structured DB.
 
 ---
@@ -581,7 +635,7 @@ flowchart TB
     end
     subgraph Data
         DB[(Structured DB\npr, parsed_quote, parsed_msa)]
-        VS[(Vector store\nOpenSearch or Qdrant)]
+        VS[(Vector store\nPGVector, Qdrant, or OpenSearch)]
     end
     Q --> O
     O --> SQL
@@ -595,7 +649,7 @@ flowchart TB
 
 - **Orchestrator:** Receives a question (e.g. “What is the PR number and total value? Which contract applies?”), calls **query_sql** for facts from the structured tables and **rag_search** for relevant chunks from the vector store, then uses the LLM to synthesize an answer.
 - **SQL agent / tool:** Runs read-only SQL on **pr**, **parsed_quote**, **parsed_msa** (Section 6).
-- **RAG agent / tool:** Runs semantic search via **rag_search(query, k=3)** on the vector store (Section 7: OpenSearch or Qdrant).
+- **RAG agent / tool:** Runs semantic search via **rag_search(query, k=3)** on the vector store (Section 7: PGVector, Qdrant, or OpenSearch).
 - Compliance **Check 1** and **Check 2** (Sections 9–10) run after the orchestrator; they use the same LLM and structured/RAG context as needed.
 
 ---
@@ -605,16 +659,16 @@ flowchart TB
 | Component        | Production (AWS)                    | Local (run & test)                          |
 |-----------------|-------------------------------------|---------------------------------------------|
 | **ENV_MODE**    | `aws`                               | `local`                                      |
-| **LLM**         | Amazon Bedrock (e.g. Claude 3.5 Haiku) | Groq (free tier, e.g. llama-3)           |
-| **Embeddings**  | Amazon Titan Embeddings (1536 dim)  | **sentence-transformers** **all-MiniLM-L6-v2** (384 dim) |
+| **LLM**         | Amazon Bedrock (Claude Sonnet 4)    | Groq or Gemini (free tier)                  |
+| **Embeddings**  | Amazon Titan V2 (1024-dim)          | **sentence-transformers** **all-MiniLM-L6-v2** (384-dim) |
 | **Chunking**    | RecursiveCharacterTextSplitter (500 chars, 50 overlap) | Same (LangChain) |
 | **Structured DB** | Amazon RDS (PostgreSQL)           | SQLite (default); view with DBeaver. Optional: PostgreSQL |
-| **Vector DB**   | **AWS OpenSearch** (k-NN index)     | **Qdrant Cloud** (collection)               |
+| **Vector DB**   | **PGVector** (RDS/Aurora PostgreSQL) | **Qdrant Cloud** (collection)               |
 | **Orchestrator**| SQL tool + RAG tool → LLM synthesis | Same                                         |
 | **Document Store** | S3                               | Local folder (e.g. `synthetic_data/` or `input/`) |
 | **Optional**    | Step Functions, Lambda (see ENGINEERING_AWS.md) | Not required for notebook |
 
-The **master notebook** uses **ENV_MODE** (or auto-detect from env vars) and **validates required variables** in Section 0: for **local** you must set **GROQ_API_KEY**, **QDRANT_URL**, **QDRANT_API_KEY**; for **aws** you must set **AWS_REGION** (or **AWS_PROFILE**), **BEDROCK_MODEL_ID**, **OPENSEARCH_ENDPOINT**.
+The **master notebook** uses **ENV_MODE** (or auto-detect from env vars) and **validates required variables** in Section 0: for **local** you must set **GROQ_API_KEY**, **QDRANT_URL**, **QDRANT_API_KEY**; for **aws** you must set **AWS_REGION** (or **AWS_PROFILE**), **BEDROCK_MODEL_ID**, **PGVECTOR_URL**. You can also mix-and-match providers with `LLM_PROVIDER`, `EMBEDDINGS_PROVIDER`, `VECTOR_STORE_PROVIDER` (see `.env.example`).
 
 ### Local RAG: chunking and embedding model
 
@@ -635,7 +689,7 @@ For **ENV_MODE=local**, RAG uses:
   **Recommendation:** Start with the notebook; add an MCP server later if you need multi-client or agentic tool use.
 
 - **Vector store / RAG**  
-  **Implemented:** Production uses **AWS OpenSearch**; local uses **Qdrant Cloud**. Chunks (500 chars, 50 overlap) are embedded with Titan (AWS) or sentence-transformers **all-MiniLM-L6-v2** (local) and indexed. The **orchestrator** (Section 8) uses **rag_search** plus **query_sql** to answer questions before Check 1 and Check 2.
+  **Implemented:** Production uses **PGVector** (RDS/Aurora PostgreSQL); local uses **Qdrant Cloud**. OpenSearch is also supported as an alternative. Chunks (500 chars, 50 overlap) are embedded with Titan (AWS) or sentence-transformers **all-MiniLM-L6-v2** (local) and indexed. The **orchestrator** (Section 8) uses **rag_search** plus **query_sql** to answer questions before Check 1 and Check 2.
 
 - **Threshold / policy config**  
   Check 1 is policy-driven (e.g. value bands for “1 quote” vs “3 quotes”). Store threshold config in RDS or a JSON/YAML file and pass it into the check.
@@ -666,7 +720,7 @@ Use these as **templates + one-shot**: send the schema (and optionally the `exam
 | **Check 1** | `schemas/compliance_checks/check_01_attachment_existence_classification/check_01_result.json` | Output: check_1_status, attachments_found, classified_documents[], policy_requirements_met, missing_requirements[], invoice_detected, plus UI (sub_checks, field_level_assessment, evidence). |
 | **Check 2** | `schemas/compliance_checks/check_02_document_validity_applicability/check_02_result.json` | **Dates & timings only.** Output: check_2_status, quotation_validity (quote date sequence, not expired, staleness), contract_validity (effective, not expired, covers delivery, near expiry), sub_checks, field_level_assessment, evidence, policy_reference. |
 
-Checks 3–12 will follow the same pattern: each in its own folder with a result schema and example.
+Checks 3–6 are implemented (see below); checks 7–12 will follow the same pattern: each in its own folder with a result schema and example.
 
 ---
 
@@ -870,11 +924,11 @@ Use **`document_processing_rag/.env.example`** as the template: copy to **`.env`
 
 | Variable | Purpose |
 |----------|--------|
-| `AWS_REGION` or `AWS_PROFILE` | Bedrock and OpenSearch region / profile |
-| `BEDROCK_MODEL_ID` | e.g. `anthropic.claude-3-5-haiku-20241022-v2:0` |
-| `OPENSEARCH_ENDPOINT` or `OPENSEARCH_HOST` | OpenSearch URL for vector store |
+| `AWS_REGION` or `AWS_PROFILE` | Bedrock region / CLI profile |
+| `BEDROCK_MODEL_ID` | Default: `anthropic.claude-sonnet-4-20250514-v1:0` (Claude Sonnet 4) |
+| `PGVECTOR_URL` | PostgreSQL connection string for PGVector (e.g. `postgresql+psycopg2://USER:PASS@HOST:5432/DB`) |
 
-Optional: `OPENSEARCH_INDEX_NAME`, `OPENSEARCH_USER`, `OPENSEARCH_PASSWORD`, `DATABASE_URL` (RDS), `S3_BUCKET`, `S3_PREFIX`.
+Optional: `TITAN_EMBED_MODEL_ID`, `TITAN_EMBED_DIM`, `PGVECTOR_TABLE`, `DATABASE_URL` (RDS), `S3_BUCKET`, `S3_PREFIX`.
 
 ### Required when ENV_MODE=local
 
@@ -901,7 +955,7 @@ PRtoPOAgent/
 ├── README.md                              ← This file
 ├── document_processing_rag/
 │   ├── .env.example                      ← Env template (copy to .env); ENV_MODE, AWS vs local vars
-│   ├── PR_to_PO_Master.ipynb             ← Full pipeline: §0–12 (env → parse → save → structured DB → RAG → orchestrator → Check 1 & 2)
+│   ├── PR_to_PO_Master.ipynb             ← Full pipeline: §0–16 (env → parse → save → structured DB → RAG → orchestrator → Checks 1–6 → summary → dashboard)
 │   ├── PR_to_PO_Test.ipynb               ← Demo (upload → classify)
 │   ├── requirements.txt                  ← pip dependencies (used by manual setup)
 │   ├── environment.yml                   ← Conda env: exact Python 3.10 + pip deps (reproducible across systems)
@@ -914,7 +968,23 @@ PRtoPOAgent/
 │   │       │   └── check_01_result.json
 │   │       ├── check_02_document_validity_applicability/
 │   │       │   └── check_02_result.json
-│   │       └── (check_03 … check_12 to be added)
+│   │       ├── check_03_supplier_existence_status/
+│   │       │   ├── check_03_result.json
+│   │       │   ├── check_03_input_reference.json
+│   │       │   └── check_03_category_config.json
+│   │       ├── check_04_item_description_match/
+│   │       │   ├── check_04_result.json
+│   │       │   ├── check_04_input_reference.json
+│   │       │   └── check_04_category_config.json
+│   │       ├── check_05_quantity_uom_match/
+│   │       │   ├── check_05_result.json
+│   │       │   ├── check_05_input_reference.json
+│   │       │   └── check_05_category_config.json
+│   │       ├── check_06_unit_price_match/
+│   │       │   ├── check_06_result.json
+│   │       │   ├── check_06_input_reference.json
+│   │       │   └── check_06_category_config.json
+│   │       └── (check_07 … check_12 to be added)
 │   ├── DEVELOPMENT_TIMELINE.md
 │   └── ENGINEERING_AWS.md
 └── synthetic_data/
@@ -936,4 +1006,4 @@ PRtoPOAgent/
 
 ---
 
-*Version 1.0 | January 2026*
+*Version 1.1 | February 2026 — AWS stack: Bedrock Claude Sonnet 4 + Titan V2 + PGVector; Checks 3–6 implemented*

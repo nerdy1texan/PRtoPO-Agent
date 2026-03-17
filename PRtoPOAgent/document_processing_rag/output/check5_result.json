@@ -1,42 +1,87 @@
 {
   "check_id": "check_05",
-  "check_name": "Quantity & Unit of Measure",
-  "check_5_status": "PASS",
-  "summary_description": "Quantity and UOM match",
+  "check_name": "Quantity & UOM Match",
+  "check_5_status": "FAIL",
+  "summary_description": "PR line items are missing, preventing verification of quantities and UOMs against the quote.",
+  "quantity_match": false,
+  "partial_order_ok": false,
+  "uom_match": false,
+  "uom_price_alignment": false,
+  "failure_reasons": [
+    "PR line items are not provided, therefore quantity and UOM comparison against the quote cannot be performed.",
+    "Sub-check 5.1 (Quantity Match) failed: No PR quantities to compare.",
+    "Sub-check 5.2 (Partial Order) failed: No PR quantities to compare.",
+    "Sub-check 5.3 (UOM Match or Equivalent) failed: No PR UOMs to compare.",
+    "Sub-check 5.7 (UOM-Price Alignment) failed: No PR UOMs to compare."
+  ],
   "sub_checks": [
     {
-      "name": "PR quantity matches quote quantity, UOM equivalent",
-      "passed": true
+      "name": "5.1 Quantity Match (PR = Quote per line)",
+      "passed": false,
+      "reason": "PR line items are missing."
+    },
+    {
+      "name": "5.2 Partial Order (PR <= Quote qty)",
+      "passed": false,
+      "reason": "PR line items are missing."
+    },
+    {
+      "name": "5.3 UOM Match or Equivalent",
+      "passed": false,
+      "reason": "PR line items are missing."
+    },
+    {
+      "name": "5.7 UOM-Price Alignment",
+      "passed": false,
+      "reason": "PR line items are missing."
     }
   ],
   "field_level_assessment": [
     {
       "field_name": "Quantity",
-      "status": "pass",
-      "confidence": 0.99,
-      "detail": "25 Each (exact match)"
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "PR quantities are missing for comparison."
     },
     {
-      "field_name": "Unit of Measure",
-      "status": "pass",
-      "confidence": 0.99,
-      "detail": "Each (normalized from \"Each\")"
+      "field_name": "UOM",
+      "status": "fail",
+      "confidence": 1.0,
+      "detail": "PR UOMs are missing for comparison."
     }
   ],
   "evidence": [
     {
-      "field": "PR Quantity",
-      "extracted_value": "25 Each",
-      "pr_value": "25 Each",
-      "match": "Match"
+      "field": "PR Line Items",
+      "extracted_value": "[]",
+      "pr_value": "[]",
+      "match": "Missing PR data"
     },
     {
-      "field": "Quote Quantity",
-      "extracted_value": "25 Each",
-      "pr_value": "Normalized: Each",
-      "match": "Match"
+      "field": "Quote Line 1 Qty",
+      "extracted_value": "25",
+      "pr_value": "N/A",
+      "match": "No PR data for comparison"
+    },
+    {
+      "field": "Quote Line 1 UOM",
+      "extracted_value": "Each",
+      "pr_value": "N/A",
+      "match": "No PR data for comparison"
+    },
+    {
+      "field": "Quote Line 2 Qty",
+      "extracted_value": "25",
+      "pr_value": "N/A",
+      "match": "No PR data for comparison"
+    },
+    {
+      "field": "Quote Line 2 UOM",
+      "extracted_value": "Each",
+      "pr_value": "N/A",
+      "match": "No PR data for comparison"
     }
   ],
-  "policy_reference": "Data Quality Standards v2.0",
-  "agent_recommendation": null
+  "policy_reference": "Data Quality Standards v2.0; Check 5 \u00a75.1\u20135.7",
+  "agent_recommendation": "The PR line items are missing. Please ensure PR line item data is correctly extracted or provided to perform this compliance check."
 }

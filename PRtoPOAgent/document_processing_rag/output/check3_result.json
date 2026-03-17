@@ -1,57 +1,121 @@
 {
   "check_id": "check_03",
-  "check_name": "Supplier Information Validation",
-  "check_3_status": "PASS",
-  "summary_description": "Supplier name match - high confidence",
-  "supplier_found": true,
-  "matched_vendor_id": "V-10042",
-  "match_confidence": 0.94,
-  "supplier_status": "Active",
-  "entity_authorized": true,
-  "insurance_valid": true,
-  "insurance_gaps": [],
-  "certifications_valid": true,
-  "certification_gaps": [],
+  "check_name": "Supplier Existence & Status",
+  "check_3_status": "FAIL",
+  "summary_description": "Supplier 'CDW Corporation' is not found in the Supplier Master Data. This prevents verification of supplier status, authorization, insurance, and certifications.",
+  "supplier_found": false,
+  "matched_vendor_id": null,
+  "match_confidence": 0.0,
+  "supplier_status": null,
+  "entity_authorized": false,
+  "insurance_met": false,
+  "insurance_gaps": [
+    "General Liability (missing)",
+    "Workers Compensation (missing)"
+  ],
+  "certifications_met": false,
+  "certification_gaps": [
+    "ISO 13485 (missing)",
+    "FDA Registration (missing)"
+  ],
   "document_supplier_match": true,
-  "failure_reasons": [],
+  "failure_reasons": [
+    "Supplier 'CDW Corporation' not found in Supplier Master Data (Policy 3.2.1)",
+    "Supplier status cannot be verified as supplier is unknown (Policy 3.2.2)",
+    "Supplier authorization for entity '1000' cannot be verified as supplier is unknown (Policy 3.2.3)",
+    "Required insurance missing: General Liability, Workers Compensation (Policy 3.2.4)",
+    "Required certifications missing: ISO 13485, FDA Registration (Policy 3.2.5)"
+  ],
   "sub_checks": [
     {
-      "name": "PR supplier matches document supplier",
-      "passed": true
+      "name": "3.2.1 Supplier Match",
+      "passed": false
     },
     {
-      "name": "Supplier exists in master database and is active",
+      "name": "3.2.2 Supplier Status Active",
+      "passed": false
+    },
+    {
+      "name": "3.2.3 Approved For Entity",
+      "passed": false
+    },
+    {
+      "name": "3.2.4 Insurance Covered",
+      "passed": false
+    },
+    {
+      "name": "3.2.5 Certifications Current",
+      "passed": false
+    },
+    {
+      "name": "3.2.6 Document-PR Supplier Match",
       "passed": true
     }
   ],
   "field_level_assessment": [
     {
       "field_name": "Supplier Name",
-      "status": "pass",
-      "confidence": 0.94,
-      "detail": "Exact match: \"CDW Corporation\""
+      "status": "fail",
+      "confidence": 0.0,
+      "detail": "Supplier 'CDW Corporation' identified from quote and contract, but not found in Supplier Master Data."
+    },
+    {
+      "field_name": "Insurance",
+      "status": "fail",
+      "confidence": 0.0,
+      "detail": "Required insurance (General Liability, Workers Compensation) cannot be verified as supplier is unknown."
+    },
+    {
+      "field_name": "Certifications",
+      "status": "fail",
+      "confidence": 0.0,
+      "detail": "Required certifications (ISO 13485, FDA Registration) cannot be verified as supplier is unknown."
     }
   ],
   "evidence": [
     {
       "field": "PR Supplier",
-      "extracted_value": "CDW Corporation(94%)",
-      "pr_value": "CDW Corporation",
-      "match": "Match"
+      "extracted_value": "CDW Corporation (from PR justification/doc_pr_supplier_name)",
+      "pr_value": "Not specified (null in pr_suggested_supplier)",
+      "match": "Implied Match"
     },
     {
       "field": "Quote Supplier",
-      "extracted_value": "CDW Corporation(94%)",
-      "pr_value": "CDW Corporation",
+      "extracted_value": "CDW Corporation",
+      "pr_value": "CDW Corporation (implied PR supplier)",
       "match": "Match"
     },
     {
       "field": "Master Record",
-      "extracted_value": "CDW Corporation (V-10042)",
-      "pr_value": "Active",
-      "match": "Match"
+      "extracted_value": "No record found",
+      "pr_value": "CDW Corporation",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Insurance: General Liability",
+      "extracted_value": "Not available (supplier unknown)",
+      "pr_value": "Required per category ''",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Insurance: Workers Compensation",
+      "extracted_value": "Not available (supplier unknown)",
+      "pr_value": "Required per category ''",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Certification: ISO 13485",
+      "extracted_value": "Not available (supplier unknown)",
+      "pr_value": "Required per category ''",
+      "match": "Mismatch"
+    },
+    {
+      "field": "Certification: FDA Registration",
+      "extracted_value": "Not available (supplier unknown)",
+      "pr_value": "Required per category ''",
+      "match": "Mismatch"
     }
   ],
-  "policy_reference": "Supplier Master Data Policy, Section 2.1",
-  "agent_recommendation": "No action required."
+  "policy_reference": "Supplier Master Data Policy \u00a72.1; Category Insurance \u00a73.3; Category Certifications \u00a73.4",
+  "agent_recommendation": "Supplier 'CDW Corporation' is not found in the Supplier Master Data. Initiate a new vendor onboarding process for CDW Corporation or verify if an existing vendor record exists under a different name. All subsequent checks (status, authorization, insurance, certifications) are blocked until the supplier is properly identified and active in the master data."
 }

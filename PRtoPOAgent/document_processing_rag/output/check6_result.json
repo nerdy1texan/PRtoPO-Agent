@@ -1,48 +1,47 @@
 {
   "check_id": "check_06",
-  "check_name": "Amount / Price Validation",
+  "check_name": "Unit Price Match",
   "check_6_status": "FAIL",
-  "summary_description": "PR unit price $2650 vs Quote unit price $2650 - variance $0 (0%)",
+  "summary_description": "PR line items are missing, preventing unit price verification against the quote. Cannot perform price match or markup checks.",
+  "quote_price_match": false,
+  "contract_ceiling_ok": true,
+  "rate_card_ok": true,
+  "discount_applied": false,
+  "no_markup_vs_quote": false,
+  "currency_alignment": true,
+  "failure_reasons": [
+    "PR line items are missing, preventing any unit price comparison with the quote.",
+    "Cannot verify PR-Quote Price Match (6.1) due to missing PR data.",
+    "Cannot verify No Markup vs Quote (6.5) due to missing PR data."
+  ],
   "sub_checks": [
     {
-      "name": "PR line prices match quote prices",
+      "name": "6.1 PR\u2013Quote Price Match (+/- 1% or $1)",
       "passed": false
-    }
-  ],
-  "field_level_assessment": [
-    {
-      "field_name": "Unit Price (Line 1)",
-      "status": "fail",
-      "confidence": 0.97,
-      "detail": "PR: $2650 vs Quote: $2650 (variance: $0)"
     },
     {
-      "field_name": "Total Amount",
-      "status": "fail",
-      "confidence": 0.99,
-      "detail": "PR: $66,250 vs Quote: $71,250 (variance: -$5,000)"
-    }
-  ],
-  "evidence": [
-    {
-      "field": "PR Unit Price",
-      "extracted_value": "$2650.00(99%)",
-      "pr_value": "$2650.00",
-      "match": "Match"
+      "name": "6.2 Contract Price Ceiling",
+      "passed": true
     },
     {
-      "field": "Quote Unit Price",
-      "extracted_value": "$2650.00(98%)",
-      "pr_value": "Expected: $2650.00",
-      "match": "Match"
+      "name": "6.3 Rate Card Compliance (T&M)",
+      "passed": true
     },
     {
-      "field": "Variance",
-      "extracted_value": "$0.00 per hour",
-      "pr_value": "Variance: 0%",
-      "match": "Match"
+      "name": "6.4 Discount Applied",
+      "passed": false
+    },
+    {
+      "name": "6.5 No Markup vs Quote",
+      "passed": false
+    },
+    {
+      "name": "6.6 Currency Alignment",
+      "passed": true
     }
   ],
-  "policy_reference": "Price Validation Policy v1.5, Section 4.1",
-  "agent_recommendation": "Recommend no action as PR unit price matches quote unit price."
+  "field_level_assessment": [],
+  "evidence": [],
+  "policy_reference": "Price Validation Policy v1.5; Check 6 \u00a76.1\u20136.6",
+  "agent_recommendation": "Missing PR line items. Please ensure PR line items are correctly extracted or provided for unit price verification. Without PR line items, checks 6.1, 6.4, and 6.5 cannot be performed."
 }

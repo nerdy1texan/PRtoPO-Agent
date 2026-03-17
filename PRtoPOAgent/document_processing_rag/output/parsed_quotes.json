@@ -18,7 +18,7 @@
     },
     "ship_to": {
       "company": "Meridian Technologies Inc.",
-      "attention": "IT Receiving \u2014 Attn: David Chen",
+      "attention": "IT Receiving - Attn: David Chen",
       "address": "200 Seaport Blvd, 14th Floor, Boston, MA 02210",
       "email": "david.chen@meridiantech.com"
     },
@@ -27,7 +27,7 @@
         "line_number": 1,
         "supplier_part_number": "7458923",
         "manufacturer_part_number": "21FA000GUS",
-        "description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation, Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
+        "description": "Lenovo ThinkPad P16 Gen 2 Mobile Workstation Intel Core i7-13850HX (24C/32T, 5.3GHz), 32GB DDR5-5600, 1TB PCIe Gen4 NVMe, NVIDIA RTX A1000 6GB, 16\" WQXGA IPS 400nit, IR+FHD Cam, Fingerprint, Wi-Fi 6E, BT 5.3, Win 11 Pro, 3-Year Premier Onsite Warranty",
         "quantity": 25,
         "unit_of_measure": "Each",
         "unit_price": 2650.0,
@@ -37,7 +37,7 @@
         "line_number": 2,
         "supplier_part_number": "7129456",
         "manufacturer_part_number": "40B00135US",
-        "description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock. 4x USB-A 3.2, 2x Thunderbolt 4, 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD",
+        "description": "Lenovo ThinkPad Universal Thunderbolt 4 Dock 4x USB-A 3.2, 1x USB-C 3.2, 2x Thunderbolt 4 (downstream), 2x HDMI 2.1, 1x DP 1.4a, 1x RJ45 2.5GbE, 135W PD, Kensington Nano Lock Slot",
         "quantity": 25,
         "unit_of_measure": "Each",
         "unit_price": 200.0,
